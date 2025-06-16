@@ -52,11 +52,15 @@ async function run() {
   }
 
   const updates = [];
+  const newItemNames = [];
+  const updatedItemNames = [];
+  const deletedItemNames = [];
   for (const currentItem of currentItems) {
     const oldItem = oldItems.find((item) => item.id === currentItem.id);
     if (!oldItem) {
       // New shop item!
       updates.push(JSXSlack(NewItem({ item: currentItem })));
+      newItemNames.push(currentItem.title);
       continue;
     }
 
@@ -67,12 +71,14 @@ async function run() {
 
     // Updated item!
     updates.push(JSXSlack(UpdatedItem({ oldItem, newItem: currentItem })));
+    updatedItemNames.push(`${oldItem.title} → ${currentItem.title}`);
   }
   for (const oldItem of oldItems) {
     const currentItem = currentItems.find((item) => item.id === oldItem.id);
     if (!currentItem) {
       // Deleted shop item
       updates.push(JSXSlack(DeletedItem({ item: oldItem })));
+      deletedItemNames.push(oldItem.title);
       continue;
     }
   }
@@ -84,10 +90,21 @@ async function run() {
     await writeFile(env.BLOCKS_LOG_PATH, JSON.stringify(updates, null, 2));
   }
 
+  const notificationTexts = [];
+  if (newItemNames.length !== 0) {
+    notificationTexts.push(`*new items:* ${newItemNames.join(", ")}`);
+  }
+  if (deletedItemNames.length !== 0) {
+    notificationTexts.push(`*deleted items:* ${deletedItemNames.join(", ")}`);
+  }
+  if (updatedItemNames.length !== 0) {
+    notificationTexts.push(`*updated items:* ${updatedItemNames.join(", ")}`);
+  }
+  const notificationText = `✨ ${notificationTexts.join(" · ")}`;
   for (const update of updates) {
     // TODO: inefficient.
     const result = await slack.chat.postMessage({
-      text: "✨ *New Summer of Making shop updates*",
+      text: notificationText,
       blocks: update,
       channel: env.SLACK_CHANNEL_ID,
       unfurl_links: false,
@@ -97,8 +114,9 @@ async function run() {
       throw new Error(`Failed to send chunked Slack message: ${result.error}`);
     }
   }
+
   await slack.chat.postMessage({
-    text: "@shop-watchers",
+    text: notificationText,
     blocks: JSXSlack(UsergroupPing({ usergroupId: env.SLACK_USERGROUP_ID })),
     channel: env.SLACK_CHANNEL_ID,
     unfurl_links: false,
