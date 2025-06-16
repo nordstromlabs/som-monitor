@@ -13,6 +13,7 @@ const env = type({
   SLACK_XOXB: "string",
   SLACK_USERGROUP_ID: "string",
   OLD_ITEMS_PATH: "string = 'items.json'",
+  "BLOCKS_LOG_PATH?": "string",
 })(process.env);
 
 async function run() {
@@ -72,6 +73,10 @@ async function run() {
 
   console.log(`📰 ${updates.length} updates found.`);
   console.log(JSON.stringify(updates, null, 2));
+
+  if (env.BLOCKS_LOG_PATH) {
+    await writeFile(env.BLOCKS_LOG_PATH, JSON.stringify(updates, null, 2));
+  }
 
   const result = await slack.chat.postMessage({
     text: "✨ *New Summer of Making shop updates*",
