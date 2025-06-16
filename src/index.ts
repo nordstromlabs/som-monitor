@@ -73,18 +73,15 @@ async function run() {
   console.log(`📰 ${updates.length} updates found.`);
   console.log(JSON.stringify(updates, null, 2));
 
-  const chunkSize = 50; // slack API limit
-  for (const chunk of chunkArray(updates, chunkSize)) {
-    const result = await slack.chat.postMessage({
-      text: "✨ *New Summer of Making shop updates*",
-      blocks: chunk,
-      channel: env.SLACK_CHANNEL_ID,
-      unfurl_links: false,
-      unfurl_media: false,
-    });
-    if (!result.ok) {
-      throw new Error(`Failed to send chunked Slack message: ${result.error}`);
-    }
+  const result = await slack.chat.postMessage({
+    text: "✨ *New Summer of Making shop updates*",
+    blocks: updates,
+    channel: env.SLACK_CHANNEL_ID,
+    unfurl_links: false,
+    unfurl_media: false,
+  });
+  if (!result.ok) {
+    throw new Error(`Failed to send chunked Slack message: ${result.error}`);
   }
   await slack.chat.postMessage({
     text: "@shop-watchers",
@@ -109,12 +106,4 @@ async function writeItems(newItems: ShopItem[]) {
     process.exit(1);
   }
   await writeFile(env.OLD_ITEMS_PATH, JSON.stringify(newItems, null, 2));
-}
-
-function chunkArray<T>(arr: T[], size: number): T[][] {
-  const chunks = [];
-  for (let i = 0; i < arr.length; i += size) {
-    chunks.push(arr.slice(i, i + size));
-  }
-  return chunks;
 }
