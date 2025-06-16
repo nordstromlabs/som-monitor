@@ -78,15 +78,18 @@ async function run() {
     await writeFile(env.BLOCKS_LOG_PATH, JSON.stringify(updates, null, 2));
   }
 
-  const result = await slack.chat.postMessage({
-    text: "✨ *New Summer of Making shop updates*",
-    blocks: updates,
-    channel: env.SLACK_CHANNEL_ID,
-    unfurl_links: false,
-    unfurl_media: false,
-  });
-  if (!result.ok) {
-    throw new Error(`Failed to send chunked Slack message: ${result.error}`);
+  for (const update of updates) {
+    // TODO: inefficient.
+    const result = await slack.chat.postMessage({
+      text: "✨ *New Summer of Making shop updates*",
+      blocks: update,
+      channel: env.SLACK_CHANNEL_ID,
+      unfurl_links: false,
+      unfurl_media: false,
+    });
+    if (!result.ok) {
+      throw new Error(`Failed to send chunked Slack message: ${result.error}`);
+    }
   }
   await slack.chat.postMessage({
     text: "@shop-watchers",
