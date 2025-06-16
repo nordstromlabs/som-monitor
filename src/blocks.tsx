@@ -76,9 +76,9 @@ export function UpdatedItem({ oldItem, newItem }: { oldItem: ShopItem; newItem: 
 export function UsergroupPing({ usergroupId }: { usergroupId: string }) {
     return (
         <Blocks>
-            <Section>
-                pinging <a href="@S091HANUAR1" />
-            </Section>
+            <Context>
+                pinging <a href={`@${usergroupId}`} />
+            </Context>
         </Blocks>
     )
 }
