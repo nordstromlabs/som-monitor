@@ -58,6 +58,7 @@ export function UpdatedItem({ oldItem, newItem }: { oldItem: ShopItem; newItem: 
     const priceChanged = oldItem.price !== newItem.price
     const titleChanged = oldItem.title !== newItem.title
     const descChanged = oldItem.description !== newItem.description
+    const imageUrlChanged = oldItem.imageUrl !== newItem.imageUrl
 
     return (
         <Blocks>
@@ -69,6 +70,18 @@ export function UpdatedItem({ oldItem, newItem }: { oldItem: ShopItem; newItem: 
                 {descChanged ? `${oldItem.description || "_no description_"} → ${newItem.description || "_no description_"}` : newItem.description}{' '}
                 <a href={newItem.purchaseUrl}><b><Trolley /> Buy</b></a>
             </Section>
+            {imageUrlChanged ? (
+                <>
+                    {oldItem.imageUrl ? (<Image
+                        src={oldItem.imageUrl}
+                        alt={`Old image for ${newItem.title}`}
+                    />) : null}
+                </>
+            ) : null}
+            {newItem.imageUrl ? (<Image
+                src={newItem.imageUrl}
+                alt={`New image for ${newItem.title}`}
+            />) : null}
         </Blocks>
     )
 }
