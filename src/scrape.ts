@@ -38,7 +38,7 @@ export async function scrape(cookie: string) {
       child.querySelector("img.rounded-lg") as unknown as
         | HTMLImageElement
         | undefined
-    )?.src;
+    )?.src.trim();
     const description = child
       .querySelector("div.mb-4 > p.text-gray-700")
       ?.textContent?.trim();
