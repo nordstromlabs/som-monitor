@@ -1,6 +1,6 @@
 import { type } from "arktype";
 import { scrape, ShopItems, type ShopItem } from "./scrape";
-import { NewItem, UpdatedItem } from "./blocks";
+import { DeletedItem, NewItem, UpdatedItem } from "./blocks";
 import { JSXSlack } from "jsx-slack";
 import { readFile, writeFile, exists } from "node:fs/promises";
 import { deepEquals } from "bun";
@@ -57,6 +57,15 @@ for (const currentItem of currentItems) {
   // Updated item!
   updates.push(JSXSlack(UpdatedItem({ oldItem, newItem: currentItem })));
 }
+for (const oldItem of oldItems) {
+  const currentItem = currentItems.find((item) => item.id === oldItem.id);
+  if (!currentItem) {
+    // Deleted shop item
+    updates.push(JSXSlack(DeletedItem({ item: oldItem })));
+    continue;
+  }
+}
+
 console.log(`📰 ${updates.length} updates found.`);
 console.log(JSON.stringify(updates, null, 2));
 

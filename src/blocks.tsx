@@ -9,15 +9,41 @@ function Trolley() {
     return <>:tw_shopping_trolley:</>
 }
 
+function New() {
+    return <>:new:</>
+}
+
+function Trash() {
+    return <>:win10-trash:</>
+}
+
 export function NewItem({ item }: { item: ShopItem }) {
     return (
         <Blocks>
-            <Header>New item! {item.title} (<Shells /> {item.price})</Header>
+            <Header><New /> {item.title} (<Shells /> {item.price})</Header>
             <Section>
                 {item.description && item.description !== "" ?
                     (<i>{item.description}</i>)
                     : null}
                 <a href={item.purchaseUrl}><b><Trolley /> Buy</b></a>
+            </Section>
+            {item.imageUrl ? <Image
+                src={item.imageUrl}
+                alt={`Image for ${item.title}`}
+            /> : null}
+        </Blocks >
+    )
+}
+
+
+export function DeletedItem({ item }: { item: ShopItem }) {
+    return (
+        <Blocks>
+            <Header><Trash /> {item.title} (<Shells /> {item.price})</Header>
+            <Section>
+                {item.description && item.description !== "" ?
+                    (<i>{item.description}</i>)
+                    : null}
             </Section>
             {item.imageUrl ? <Image
                 src={item.imageUrl}
