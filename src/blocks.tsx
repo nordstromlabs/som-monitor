@@ -65,7 +65,7 @@ export function UpdatedItem({ oldItem, newItem }: { oldItem: ShopItem; newItem: 
                 (<Shells /> {priceChanged ? `${oldItem.price} → ${newItem.price}` : newItem.price})
             </Header>
             <Section>
-                {descChanged ? `${oldItem.description} → ${newItem.description}` : newItem.description}{' '}
+                {descChanged ? `${oldItem.description || "_no description_"} → ${newItem.description || "_no description_"}` : newItem.description}{' '}
                 <a href={newItem.purchaseUrl}><b><Trolley /> Buy</b></a>
             </Section>
         </Blocks>
