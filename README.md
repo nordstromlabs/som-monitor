@@ -4,8 +4,6 @@ _(or, [High Seas Monitor](https://github.com/skyfallwastaken/high-seas-monitor) 
 
 SOM Monitor is a monitor for Hack Club's [Summer of Making Shop.](https://summer.hackclub.com) It continuously checks for new items and item updates, keeping you in the loop on the stuff you want.
 
-![image](https://cloud-5w5xr0pgh-hack-club-bot.vercel.app/0image.png)
-
 ## Usage
 
 To get started, simply join the [#som-monitor](https://hackclub.slack.com/archives/C091PEQP7CJ) channel on Slack.
