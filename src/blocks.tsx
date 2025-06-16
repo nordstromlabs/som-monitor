@@ -1,5 +1,6 @@
+import { execSync } from "node:child_process";
 import { type ShopItem } from "./scrape";
-import { Blocks, Header, Section, Image } from 'jsx-slack';
+import { Blocks, Header, Section, Image, Context } from 'jsx-slack';
 
 function Shells() {
     return <>:shells:</>
@@ -68,6 +69,16 @@ export function UpdatedItem({ oldItem, newItem }: { oldItem: ShopItem; newItem: 
                 {descChanged ? `${oldItem.description || "_no description_"} → ${newItem.description || "_no description_"}` : newItem.description}{' '}
                 <a href={newItem.purchaseUrl}><b><Trolley /> Buy</b></a>
             </Section>
+        </Blocks>
+    )
+}
+
+export function UsergroupPing({ usergroupId }: { usergroupId: string }) {
+    return (
+        <Blocks>
+            <Context>
+                pinging {`<!subteam^${usergroupId}>`}
+            </Context>
         </Blocks>
     )
 }

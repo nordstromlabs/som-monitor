@@ -11,10 +11,12 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@slack/bolt": "^4.4.0",
     "@slack/web-api": "^7.9.2",
     "arktype": "^2.1.20",
     "croner": "^9.0.0",
     "happy-dom": "^18.0.1",
+    "jsdom": "^26.1.0",
     "jsx-slack": "^6.1.2"
   },
   "scripts": {

@@ -1,6 +1,6 @@
 import { type } from "arktype";
 import { scrape, ShopItems, type ShopItem } from "./scrape";
-import { DeletedItem, NewItem, UpdatedItem } from "./blocks";
+import { DeletedItem, NewItem, UpdatedItem, UsergroupPing } from "./blocks";
 import { JSXSlack } from "jsx-slack";
 import { readFile, writeFile, exists } from "node:fs/promises";
 import { deepEquals } from "bun";
@@ -14,6 +14,7 @@ async function run() {
     SOM_COOKIE: "string",
     SLACK_CHANNEL_ID: "string",
     SLACK_XOXB: "string",
+    SLACK_USERGROUP_ID: "string",
   })(process.env);
 
   if (env instanceof type.errors) {
@@ -87,6 +88,13 @@ async function run() {
       );
     }
   }
+  await slack.chat.postMessage({
+    text: "@shop-watchers",
+    blocks: JSXSlack(UsergroupPing({ usergroupId: env.SLACK_USERGROUP_ID })),
+    channel: env.SLACK_CHANNEL_ID,
+    unfurl_links: false,
+    unfurl_media: false,
+  });
 
   await writeItems(currentItems);
   console.log("🙌 Run completed!");
