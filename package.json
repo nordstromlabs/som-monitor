@@ -11,6 +11,7 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@sentry/bun": "^9.29.0",
     "@slack/bolt": "^4.4.0",
     "@slack/web-api": "^7.9.2",
     "arktype": "^2.1.20",

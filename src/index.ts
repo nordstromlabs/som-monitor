@@ -6,22 +6,28 @@ import { readFile, writeFile, exists } from "node:fs/promises";
 import { deepEquals } from "bun";
 import { WebClient } from "@slack/web-api";
 import { Cron } from "croner";
+import * as Sentry from "@sentry/bun";
 
-const env = type({
+const envSchema = type({
   SOM_COOKIE: "string",
   SLACK_CHANNEL_ID: "string",
   SLACK_XOXB: "string",
   SLACK_USERGROUP_ID: "string",
   OLD_ITEMS_PATH: "string = 'items.json'",
-  "BLOCKS_LOG_PATH?": "string",
-})(process.env);
+  BLOCKS_LOG_PATH: "string?",
+  SENTRY_DSN: "string?",
+});
+const env = envSchema.assert(process.env);
+
+if (env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: env.SENTRY_DSN,
+    sendDefaultPii: true,
+    tracesSampleRate: 1.0,
+  });
+}
 
 async function run() {
-  if (env instanceof type.errors) {
-    console.error(env.summary);
-    process.exit(1);
-  }
-
   const slack = new WebClient(env.SLACK_XOXB);
 
   const currentItems = await scrape(env.SOM_COOKIE);
@@ -108,10 +114,5 @@ new Cron("*/5 * * * *", run);
 run();
 
 async function writeItems(newItems: ShopItem[]) {
-  // make typescript shut up
-  if (env instanceof type.errors) {
-    console.error(env.summary);
-    process.exit(1);
-  }
   await writeFile(env.OLD_ITEMS_PATH, JSON.stringify(newItems, null, 2));
 }
