@@ -7,16 +7,15 @@ import { deepEquals } from "bun";
 import { WebClient } from "@slack/web-api";
 import { Cron } from "croner";
 
-const OLD_ITEMS_PATH = "items.json";
+const env = type({
+  SOM_COOKIE: "string",
+  SLACK_CHANNEL_ID: "string",
+  SLACK_XOXB: "string",
+  SLACK_USERGROUP_ID: "string",
+  OLD_ITEMS_PATH: "string = 'items.json'",
+})(process.env);
 
 async function run() {
-  const env = type({
-    SOM_COOKIE: "string",
-    SLACK_CHANNEL_ID: "string",
-    SLACK_XOXB: "string",
-    SLACK_USERGROUP_ID: "string",
-  })(process.env);
-
   if (env instanceof type.errors) {
     console.error(env.summary);
     process.exit(1);
@@ -25,14 +24,16 @@ async function run() {
   const slack = new WebClient(env.SLACK_XOXB);
 
   const currentItems = await scrape(env.SOM_COOKIE);
-  if (!(await exists(OLD_ITEMS_PATH))) {
-    console.log(`👋 First sync successful! Writing to \`${OLD_ITEMS_PATH}\``);
+  if (!(await exists(env.OLD_ITEMS_PATH))) {
+    console.log(
+      `👋 First sync successful! Writing to \`${env.OLD_ITEMS_PATH}\``
+    );
     await writeItems(currentItems);
     return;
   }
 
   const oldItems = ShopItems(
-    JSON.parse(await readFile(OLD_ITEMS_PATH, { encoding: "utf-8" }))
+    JSON.parse(await readFile(env.OLD_ITEMS_PATH, { encoding: "utf-8" }))
   );
   if (oldItems instanceof type.errors) {
     throw new Error(oldItems.summary);
@@ -105,5 +106,10 @@ new Cron("*/5 * * * *", run);
 run();
 
 async function writeItems(newItems: ShopItem[]) {
-  await writeFile(OLD_ITEMS_PATH, JSON.stringify(newItems, null, 2));
+  // make typescript shut up
+  if (env instanceof type.errors) {
+    console.error(env.summary);
+    process.exit(1);
+  }
+  await writeFile(env.OLD_ITEMS_PATH, JSON.stringify(newItems, null, 2));
 }
