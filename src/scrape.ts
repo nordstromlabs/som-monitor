@@ -11,6 +11,7 @@ const ShopItem = type({
   price: "number",
   purchaseUrl: "string",
   id: "number",
+  "stockRemaining?": "number > 0",
 });
 export type ShopItem = typeof ShopItem.infer;
 export const ShopItems = ShopItem.array();
@@ -32,15 +33,15 @@ export async function scrape(cookie: string) {
 
   const results: ShopItems = [];
   for (const child of grid.children) {
-    const title = child.querySelector("h3")?.textContent!;
+    const title = child.querySelector("h3")?.textContent.trim()!;
     const imageUrl = (
       child.querySelector("img.rounded-lg") as unknown as
         | HTMLImageElement
         | undefined
     )?.src;
-    const description = child.querySelector(
-      "div.mb-4 > p.text-gray-700"
-    )?.textContent;
+    const description = child
+      .querySelector("div.mb-4 > p.text-gray-700")
+      ?.textContent?.trim();
     const price =
       Number(
         child
@@ -50,7 +51,7 @@ export async function scrape(cookie: string) {
           ?.parentElement?.textContent.trim()
           .replaceAll(",", "")
       ) || 0;
-    const purchaseUrl = child.querySelector("form")?.action!;
+    const purchaseUrl = child.querySelector("form")?.action.trim()!;
     const id = Number(purchaseUrl.replace(/[^0-9]/g, ""));
 
     results.push({
