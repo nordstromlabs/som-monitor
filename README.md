@@ -22,6 +22,7 @@ Fill out your environment variables:
 SOM_COOKIE=<entire `Cookie` header value>
 SLACK_CHANNEL_ID="C091PEQP7CJ" # som-monitor
 SLACK_XOXB=<xoxb-...>
+SLACK_USERGROUP_ID=<...>
 ```
 
 To run:
