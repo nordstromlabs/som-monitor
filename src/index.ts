@@ -71,7 +71,7 @@ async function run() {
 
     // Updated item!
     updates.push(JSXSlack(UpdatedItem({ oldItem, newItem: currentItem })));
-    updatedItemNames.push(`${oldItem.title} → ${currentItem.title}`);
+    updatedItemNames.push(oldItem.title);
   }
   for (const oldItem of oldItems) {
     const currentItem = currentItems.find((item) => item.id === oldItem.id);
