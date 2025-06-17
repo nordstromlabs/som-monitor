@@ -29,7 +29,7 @@ export function NewItem({ item }: { item: ShopItem }) {
         } else if (typeof item.stockRemaining === "number") {
             return <><Warning /> <b>Stock:</b> {item.stockRemaining} items available</>
         } else {
-            return <><Warning /> <b>Stock:</b> Unlimited</>
+            return <><b>Stock:</b> Unlimited</>
         }
     }
 
@@ -80,14 +80,29 @@ export function UpdatedItem({ oldItem, newItem }: { oldItem: ShopItem; newItem: 
     const titleChanged = oldItem.title !== newItem.title
     const descChanged = oldItem.description !== newItem.description
     const imageUrlChanged = oldItem.imageUrl !== newItem.imageUrl
+    const stockChanged = oldItem.stockRemaining !== newItem.stockRemaining
 
     const renderStock = () => {
-        if (newItem.stockRemaining === 0) {
-            return <><Warning /> <b>Out of stock</b></>
-        } else if (typeof newItem.stockRemaining === "number") {
-            return <><Warning /> <b>Stock:</b> {newItem.stockRemaining} items available</>
+        if (stockChanged) {
+            const oldStock = oldItem.stockRemaining === 0 ? "Out of stock" 
+                : typeof oldItem.stockRemaining === "number" ? `${oldItem.stockRemaining} items`
+                : "Unlimited"
+            
+            const newStock = newItem.stockRemaining === 0 ? "Out of stock"
+                : typeof newItem.stockRemaining === "number" ? `${newItem.stockRemaining} items`
+                : "Unlimited"
+
+            const prefix = newItem.stockRemaining === 0 ? <><Warning /> </> : ""
+            
+            return <>{prefix}<b>Stock:</b> {oldStock} → {newStock}</>
         } else {
-            return <><Warning /> <b>Stock:</b> Unlimited</>
+            if (newItem.stockRemaining === 0) {
+                return <><Warning /> <b>Out of stock</b></>
+            } else if (typeof newItem.stockRemaining === "number") {
+                return <><Warning /> <b>Stock:</b> {newItem.stockRemaining} items available</>
+            } else {
+                return <><b>Stock:</b> Unlimited</>
+            }
         }
     }
 
