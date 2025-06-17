@@ -1,5 +1,7 @@
 import { Window } from "happy-dom";
 import { type } from "arktype";
+import { version as bunVersion } from "bun";
+import { version } from "../package.json";
 
 const SOM_ROOT_DOMAIN = "https://summer.hackclub.com";
 const SOM_URL = `${SOM_ROOT_DOMAIN}/shop`;
@@ -21,6 +23,7 @@ export async function scrape(cookie: string) {
   const response = await fetch(SOM_URL, {
     headers: {
       Cookie: cookie,
+      "User-Agent": `SOM-Monitor/${version} bun/${bunVersion} (+https://skyfall.dev)`,
     },
   });
   const window = new Window({ url: SOM_URL });
