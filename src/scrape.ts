@@ -11,7 +11,7 @@ const ShopItem = type({
   price: "number",
   purchaseUrl: "string",
   id: "number",
-  stockRemaining: "(number > 0) | undefined",
+  "stockRemaining?": "(number > 0) | undefined",
 });
 export type ShopItem = typeof ShopItem.infer;
 export const ShopItems = ShopItem.array();
