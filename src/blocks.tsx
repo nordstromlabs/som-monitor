@@ -18,24 +18,44 @@ function Trash() {
     return <>:win10-trash:</>
 }
 
+function Warning() {
+    return <>:tw_warning:</>
+}
+
 export function NewItem({ item }: { item: ShopItem }) {
+    const renderStock = () => {
+        if (item.stockRemaining === 0) {
+            return <><Warning /> <b>Out of stock</b></>
+        } else if (typeof item.stockRemaining === "number") {
+            return <><Warning /> <b>Stock:</b> {item.stockRemaining} items available</>
+        } else {
+            return <><Warning /> <b>Stock:</b> Unlimited</>
+        }
+    }
+
+    const showBuy = item.stockRemaining !== 0
+
     return (
         <Blocks>
             <Header><New /> {item.title} (<Shells /> {item.price})</Header>
             <Section>
-                {item.description && item.description !== "" ?
-                    (<i>{item.description}</i>)
-                    : null}
-                <a href={item.purchaseUrl}><b><Trolley /> Buy</b></a>
+                {item.description && item.description !== "" ? (
+                    <i>{item.description}</i>
+                ) : null}
+                {showBuy && (
+                    <a href={item.purchaseUrl}><b><Trolley /> Buy</b></a>
+                )}
+                {renderStock()}
             </Section>
-            {item.imageUrl ? <Image
-                src={item.imageUrl}
-                alt={`Image for ${item.title}`}
-            /> : null}
-        </Blocks >
+            {item.imageUrl ? (
+                <Image
+                    src={item.imageUrl}
+                    alt={`Image for ${item.title}`}
+                />
+            ) : null}
+        </Blocks>
     )
 }
-
 
 export function DeletedItem({ item }: { item: ShopItem }) {
     return (
@@ -60,6 +80,18 @@ export function UpdatedItem({ oldItem, newItem }: { oldItem: ShopItem; newItem: 
     const descChanged = oldItem.description !== newItem.description
     const imageUrlChanged = oldItem.imageUrl !== newItem.imageUrl
 
+    const renderStock = () => {
+        if (newItem.stockRemaining === 0) {
+            return <><Warning /> <b>Out of stock</b></>
+        } else if (typeof newItem.stockRemaining === "number") {
+            return <><Warning /> <b>Stock:</b> {newItem.stockRemaining} items available</>
+        } else {
+            return <><Warning /> <b>Stock:</b> Unlimited</>
+        }
+    }
+
+    const showBuy = newItem.stockRemaining !== 0
+
     return (
         <Blocks>
             <Header>
@@ -67,21 +99,26 @@ export function UpdatedItem({ oldItem, newItem }: { oldItem: ShopItem; newItem: 
                 (<Shells /> {priceChanged ? `${oldItem.price} → ${newItem.price}` : newItem.price})
             </Header>
             <Section>
-                {descChanged ? `${oldItem.description || "_no description_"} → ${newItem.description || "_no description_"}` : newItem.description}{' '}
-                <a href={newItem.purchaseUrl}><b><Trolley /> Buy</b></a>
+                {descChanged
+                    ? `${oldItem.description || "_no description_"} → ${newItem.description || "_no description_"}`
+                    : newItem.description}{' '}
+                {showBuy && (
+                    <a href={newItem.purchaseUrl}><b><Trolley /> Buy</b></a>
+                )}
+                {renderStock()}
             </Section>
-            {imageUrlChanged ? (
-                <>
-                    {oldItem.imageUrl ? (<Image
-                        src={oldItem.imageUrl}
-                        alt={`Old image for ${newItem.title}`}
-                    />) : null}
-                </>
+            {imageUrlChanged && oldItem.imageUrl ? (
+                <Image
+                    src={oldItem.imageUrl}
+                    alt={`Old image for ${newItem.title}`}
+                />
             ) : null}
-            {newItem.imageUrl ? (<Image
-                src={newItem.imageUrl}
-                alt={`New image for ${newItem.title}`}
-            />) : null}
+            {newItem.imageUrl ? (
+                <Image
+                    src={newItem.imageUrl}
+                    alt={`New image for ${newItem.title}`}
+                />
+            ) : null}
         </Blocks>
     )
 }

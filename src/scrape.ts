@@ -54,6 +54,14 @@ export async function scrape(cookie: string) {
     const purchaseUrl = child.querySelector("form")?.action.trim()!;
     const id = Number(purchaseUrl.replace(/[^0-9]/g, ""));
 
+    const isOutOfStock = !!child.querySelector("p.text-red-600");
+    const limitedStockRemainingText = child
+      .querySelector("p.text-orange-600")
+      ?.textContent?.replace(/[^0-9]/g, "");
+    const limitedStockRemaining = limitedStockRemainingText
+      ? Number(limitedStockRemainingText)
+      : undefined;
+
     results.push({
       title,
       imageUrl,
@@ -61,6 +69,7 @@ export async function scrape(cookie: string) {
       price,
       purchaseUrl,
       id,
+      stockRemaining: isOutOfStock ? 0 : limitedStockRemaining,
     });
   }
 
