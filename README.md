@@ -1,4 +1,4 @@
-# Summer of Making (SOM) Monitor
+![hero image for "summer of making monitor"](https://journey.90e2da927f7b2f6c30f10f86d1b5e679.r2.cloudflarestorage.com/lkhi5wgpklruxdlqzd64fueab97a?response-content-disposition=inline%3B%20filename%3D%22prismify-render-1750117591074.png%22%3B%20filename%2A%3DUTF-8%27%27prismify-render-1750117591074.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=14147de7f716b4f968218760dfed0809%2F20250617%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20250617T002838Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=9ae8047b26092ac4006636acf7af1ab11a496a451a21d35e088d49833a2ab69e)
 
 _(or, [High Seas Monitor](https://github.com/skyfallwastaken/high-seas-monitor) for the Summer of Making!_)
 
