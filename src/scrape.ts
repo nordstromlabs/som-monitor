@@ -8,9 +8,9 @@ const ShopItem = type({
   title: "string",
   "description?": "string",
   "imageUrl?": "string",
-  price: "number",
+  price: "number >= 0",
   purchaseUrl: "string",
-  id: "number",
+  id: "number >= 0",
   "stockRemaining?": "(number > 0) | undefined",
 });
 export type ShopItem = typeof ShopItem.infer;
