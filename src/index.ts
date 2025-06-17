@@ -127,8 +127,8 @@ async function run() {
   console.log("🙌 Run completed!");
 }
 
-// every five minutes!
-new Cron("*/5 * * * *", run);
+// every minute!
+new Cron("* * * * *", run);
 run();
 
 async function writeItems(newItems: ShopItem[]) {
