@@ -41,11 +41,12 @@ export function NewItem({ item }: { item: ShopItem }) {
             <Section>
                 {item.description && item.description !== "" ? (
                     <i>{item.description}</i>
-                ) : null}
+                ) : null}<br />
+                {renderStock()}<br /><br />
+
                 {showBuy && (
                     <a href={item.purchaseUrl}><b><Trolley /> Buy</b></a>
                 )}
-                {renderStock()}
             </Section>
             {item.imageUrl ? (
                 <Image
@@ -101,25 +102,29 @@ export function UpdatedItem({ oldItem, newItem }: { oldItem: ShopItem; newItem: 
             <Section>
                 {descChanged
                     ? `${oldItem.description || "_no description_"} → ${newItem.description || "_no description_"}`
-                    : newItem.description}{' '}
+                    : newItem.description}{' '}<br />
+                {renderStock()}<br /><br />
                 {showBuy && (
                     <a href={newItem.purchaseUrl}><b><Trolley /> Buy</b></a>
                 )}
-                {renderStock()}
             </Section>
-            {imageUrlChanged && oldItem.imageUrl ? (
-                <Image
-                    src={oldItem.imageUrl}
-                    alt={`Old image for ${newItem.title}`}
-                />
-            ) : null}
-            {newItem.imageUrl ? (
-                <Image
-                    src={newItem.imageUrl}
-                    alt={`New image for ${newItem.title}`}
-                />
-            ) : null}
-        </Blocks>
+            {
+                imageUrlChanged && oldItem.imageUrl ? (
+                    <Image
+                        src={oldItem.imageUrl}
+                        alt={`Old image for ${newItem.title}`}
+                    />
+                ) : null
+            }
+            {
+                newItem.imageUrl ? (
+                    <Image
+                        src={newItem.imageUrl}
+                        alt={`New image for ${newItem.title}`}
+                    />
+                ) : null
+            }
+        </Blocks >
     )
 }
 
