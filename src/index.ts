@@ -52,34 +52,57 @@ async function run() {
   }
 
   const updates = [];
-  const newItemNames = [];
-  const updatedItemNames = [];
-  const deletedItemNames = [];
+  const newItemNames: string[] = [];
+  const updatedItemNames: string[] = [];
+  const deletedItemNames: string[] = [];
+
+  const imagesToUpload: string[] = [];
+  const itemToImageIndex = new Map<ShopItem, number>();
+
+  // first pass: build updates and collect image URLs
   for (const currentItem of currentItems) {
     const oldItem = oldItems.find((item) => item.id === currentItem.id);
+
     if (!oldItem) {
-      // New shop item!
+      // new shop item!
       updates.push(JSXSlack(NewItem({ item: currentItem })));
       newItemNames.push(currentItem.title);
+      if (currentItem.imageUrl) {
+        itemToImageIndex.set(currentItem, imagesToUpload.length);
+        imagesToUpload.push(currentItem.imageUrl);
+      }
       continue;
     }
 
     if (deepEquals(oldItem, currentItem)) {
-      // Same item
       continue;
     }
 
-    // Updated item!
+    // updated item!
     updates.push(JSXSlack(UpdatedItem({ oldItem, newItem: currentItem })));
+    // collect changed image URLs
+    if (currentItem.imageUrl != oldItem.imageUrl) {
+      itemToImageIndex.set(currentItem, imagesToUpload.length);
+      imagesToUpload.push(currentItem.imageUrl!);
+    }
     updatedItemNames.push(oldItem.title);
   }
+
   for (const oldItem of oldItems) {
     const currentItem = currentItems.find((item) => item.id === oldItem.id);
     if (!currentItem) {
-      // Deleted shop item
+      // deleted item!
       updates.push(JSXSlack(DeletedItem({ item: oldItem })));
       deletedItemNames.push(oldItem.title);
-      continue;
+    }
+  }
+
+  // batch upload all collected images
+  if (imagesToUpload.length > 0) {
+    const uploaded = await uploadToCdn(imagesToUpload);
+    // assign back to items
+    for (const [item, idx] of itemToImageIndex.entries()) {
+      item.imageUrl = uploaded[idx]!.deployedUrl;
     }
   }
 
@@ -101,6 +124,7 @@ async function run() {
     notificationTexts.push(`*updated items:* ${updatedItemNames.join(", ")}`);
   }
   const notificationText = `✨ ${notificationTexts.join(" · ")}`;
+
   for (const update of updates) {
     // TODO: inefficient.
     const result = await slack.chat.postMessage({
@@ -133,4 +157,24 @@ run();
 
 async function writeItems(newItems: ShopItem[]) {
   await writeFile(env.OLD_ITEMS_PATH, JSON.stringify(newItems, null, 2));
+}
+
+const cdnResponseSchema = type({
+  files: type({
+    deployedUrl: "string.url",
+  }).array(),
+});
+async function uploadToCdn(urls: string[]) {
+  const res = await fetch("https://cdn.hackclub.com/api/v3/new", {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer beans",
+    },
+    body: JSON.stringify(urls),
+  });
+  const text = await res.text();
+  if (!res.ok)
+    throw new Error(`Error occurred whilst uploading ${urls} to CDN: ${text}`);
+  const json = cdnResponseSchema.assert(JSON.parse(text));
+  return json.files;
 }

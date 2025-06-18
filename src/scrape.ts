@@ -19,6 +19,8 @@ export type ShopItem = typeof ShopItem.infer;
 export const ShopItems = ShopItem.array();
 export type ShopItems = typeof ShopItems.infer;
 
+/// note that this scraper *does not* upload images to hc-cdn.
+/// that's for the differ to do -- that way, we don't perform extra work
 export async function scrape(cookie: string) {
   const response = await fetch(SOM_URL, {
     headers: {
@@ -80,6 +82,7 @@ export async function scrape(cookie: string) {
   if (shopItems instanceof type.errors) {
     throw new Error(shopItems.summary);
   }
+
   console.log(`🎉 Found ${shopItems.length} items.`);
   return shopItems;
 }
