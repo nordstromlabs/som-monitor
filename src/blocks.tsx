@@ -22,6 +22,10 @@ function Warning() {
     return <>:tw_warning:</>
 }
 
+function Star() {
+    return <>:star:</>
+}
+
 export function NewItem({ item }: { item: ShopItem }) {
     const renderStock = () => {
         if (item.stockRemaining === 0) {
@@ -147,7 +151,7 @@ export function UsergroupPing({ usergroupId }: { usergroupId: string }) {
     return (
         <Blocks>
             <Context>
-                pinging <a href={`@${usergroupId}`} />
+                pinging <a href={`@${usergroupId}`} /> · <a href="https://go.skyfall.dev/som-monitor"><Star /> star the repo!</a>
             </Context>
         </Blocks>
     )
