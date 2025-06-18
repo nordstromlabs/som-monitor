@@ -27,11 +27,31 @@ if (env.SENTRY_DSN) {
   });
 }
 
+async function uploadImagesForItems(items: ShopItem[]) {
+  const imagesToUpload: string[] = [];
+  const itemToImageIndex = new Map<ShopItem, number>();
+
+  for (const item of items) {
+    if (item.imageUrl) {
+      itemToImageIndex.set(item, imagesToUpload.length);
+      imagesToUpload.push(item.imageUrl);
+    }
+  }
+
+  if (imagesToUpload.length > 0) {
+    const uploaded = await uploadToCdn(imagesToUpload);
+    for (const [item, idx] of itemToImageIndex.entries()) {
+      item.imageUrl = uploaded[idx]!.deployedUrl;
+    }
+  }
+}
+
 async function run() {
   const slack = new WebClient(env.SLACK_XOXB);
 
   const currentItems = await scrape(env.SOM_COOKIE);
   if (!(await exists(env.OLD_ITEMS_PATH))) {
+    await uploadImagesForItems(currentItems);
     console.log(
       `👋 First sync successful! Writing to \`${env.OLD_ITEMS_PATH}\``
     );
@@ -56,10 +76,8 @@ async function run() {
   const updatedItemNames: string[] = [];
   const deletedItemNames: string[] = [];
 
-  const imagesToUpload: string[] = [];
-  const itemToImageIndex = new Map<ShopItem, number>();
+  const itemsNeedingImageUpload: ShopItem[] = [];
 
-  // first pass: build updates and collect image URLs
   for (const currentItem of currentItems) {
     const oldItem = oldItems.find((item) => item.id === currentItem.id);
 
@@ -68,8 +86,7 @@ async function run() {
       updates.push(JSXSlack(NewItem({ item: currentItem })));
       newItemNames.push(currentItem.title);
       if (currentItem.imageUrl) {
-        itemToImageIndex.set(currentItem, imagesToUpload.length);
-        imagesToUpload.push(currentItem.imageUrl);
+        itemsNeedingImageUpload.push(currentItem);
       }
       continue;
     }
@@ -78,12 +95,9 @@ async function run() {
       continue;
     }
 
-    // updated item!
     updates.push(JSXSlack(UpdatedItem({ oldItem, newItem: currentItem })));
-    // collect changed image URLs
-    if (currentItem.imageUrl != oldItem.imageUrl) {
-      itemToImageIndex.set(currentItem, imagesToUpload.length);
-      imagesToUpload.push(currentItem.imageUrl!);
+    if (currentItem.imageUrl != oldItem.imageUrl && currentItem.imageUrl) {
+      itemsNeedingImageUpload.push(currentItem);
     }
     updatedItemNames.push(oldItem.title);
   }
@@ -91,20 +105,12 @@ async function run() {
   for (const oldItem of oldItems) {
     const currentItem = currentItems.find((item) => item.id === oldItem.id);
     if (!currentItem) {
-      // deleted item!
       updates.push(JSXSlack(DeletedItem({ item: oldItem })));
       deletedItemNames.push(oldItem.title);
     }
   }
 
-  // batch upload all collected images
-  if (imagesToUpload.length > 0) {
-    const uploaded = await uploadToCdn(imagesToUpload);
-    // assign back to items
-    for (const [item, idx] of itemToImageIndex.entries()) {
-      item.imageUrl = uploaded[idx]!.deployedUrl;
-    }
-  }
+  await uploadImagesForItems(itemsNeedingImageUpload);
 
   console.log(`📰 ${updates.length} updates found.`);
   console.log(JSON.stringify(updates, null, 2));
@@ -151,8 +157,7 @@ async function run() {
   console.log("🙌 Run completed!");
 }
 
-// every minute!
-new Cron("* * * * *", run);
+new Cron("* * * * *", run); /* once a minute */
 run();
 
 async function writeItems(newItems: ShopItem[]) {
@@ -177,5 +182,6 @@ async function uploadToCdn(urls: string[]) {
   if (!res.ok)
     throw new Error(`Error occurred whilst uploading ${urls} to CDN: ${text}`);
   const json = cdnResponseSchema.assert(JSON.parse(text));
+  console.log(`⬆️ Uploaded ${urls.length} files to CDN.`);
   return json.files;
 }
