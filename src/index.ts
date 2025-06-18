@@ -166,6 +166,7 @@ const cdnResponseSchema = type({
 });
 async function uploadToCdn(urls: string[]) {
   const res = await fetch("https://cdn.hackclub.com/api/v3/new", {
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: "Bearer beans",
