@@ -67,7 +67,9 @@ export async function scrape(cookie: string) {
     document.body.innerHTML = await response.text();
     const grid = document.querySelector(".sm\\:grid");
     if (!grid) {
-      throw new Error(`Grid element not found whilst looking at items for ${region.code}`);
+      throw new Error(
+        `Grid element not found whilst looking at items for ${region.code}`
+      );
     }
 
     for (const child of grid.children) {
@@ -80,15 +82,17 @@ export async function scrape(cookie: string) {
       const description = child
         .querySelector("div.mb-4 > p.text-gray-700")
         ?.textContent?.trim();
-      const price =
-        Number(
-          child
-            .querySelector(
-              "div.absolute.top-2.right-2.text-lg.font-bold.whitespace-nowrap.flex.items-center > img"
-            )
-            ?.parentElement?.textContent.trim()
-            .replaceAll(",", "")
-        ) || 0;
+      const priceEl = child
+        .querySelector(
+          "div.absolute.top-2.right-2.text-lg.font-bold.whitespace-nowrap.flex.items-center > picture"
+        )
+        ?.parentElement?.textContent.trim()
+        .replaceAll(",", "");
+      if (!priceEl)
+        throw new Error(
+          "Price element not found. Has the shop page code updated?"
+        );
+      const price = Number(priceEl) || 0;
       const purchaseUrl = child.querySelector("form")?.action.trim()!;
       const id = Number(purchaseUrl.replace(/[^0-9]/g, ""));
 
