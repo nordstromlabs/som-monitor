@@ -2,7 +2,7 @@
 
 _(or, [High Seas Monitor](https://github.com/skyfallwastaken/high-seas-monitor) for the Summer of Making!_)
 
-SOM Monitor is a monitor for Hack Club's [Summer of Making Shop.](https://summer.hackclub.com) It continuously checks for new items and item updates, keeping you in the loop on the stuff you want.
+SOM Monitor is a monitor for Hack Club's [Summer of Making Shop.](https://summer.hackclub.com/shop) It continuously checks for new items and item updates, keeping you in the loop on the stuff you want.
 
 ## Usage
 
