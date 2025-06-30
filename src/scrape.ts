@@ -54,6 +54,7 @@ export const regions = [
 /// that's for the differ to do -- that way, we don't perform extra work
 export async function scrape(cookie: string) {
   const results: Map<number, ShopItem> = new Map();
+  const window = new Window({ url: SOM_URL });
 
   for (const region of regions) {
     const response = await fetch(`${SOM_URL}?region=${region.code}`, {
@@ -62,7 +63,6 @@ export async function scrape(cookie: string) {
         "User-Agent": `SOM-Monitor/${version} bun/${bunVersion} (+https://skyfall.dev)`,
       },
     });
-    const window = new Window({ url: SOM_URL });
     const document = window.document;
     document.body.innerHTML = await response.text();
     const grid = document.querySelector(".sm\\:grid");
