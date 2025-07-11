@@ -1,7 +1,5 @@
 import { Window } from "happy-dom";
 import { type } from "arktype";
-import { version as bunVersion } from "bun";
-import { version } from "../package.json";
 
 const SOM_ROOT_DOMAIN = "https://summer.hackclub.com";
 const SOM_URL = `${SOM_ROOT_DOMAIN}/shop`;
@@ -60,7 +58,7 @@ export async function scrape(cookie: string) {
     const response = await fetch(`${SOM_URL}?region=${region.code}`, {
       headers: {
         Cookie: cookie,
-        "User-Agent": `SOM-Monitor/${version} bun/${bunVersion} (+https://skyfall.dev)`,
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
       },
     });
     const document = window.document;
