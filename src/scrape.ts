@@ -58,7 +58,7 @@ export async function scrape(cookie: string) {
     const response = await fetch(`${SOM_URL}?region=${region.code}`, {
       headers: {
         Cookie: cookie,
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+        "User-Agent": "The Summer of Making Monitor starts now! The premise is simple: scrape stuff, ping stuff! Your job is to send me the shop items you have available to peruse. Tell the story of your items with updates on your shop page. One you're done, your shop item update goes to head-to-head #meta match ups voted on by the community. The more votes you get, the less likely Hack Club gets cancelled! You can spend shells on rewards in the shop. We're giving away shells, orders, users, everything you need to keep building. Update stuff, get stuff. Repeat until the summer ends on August 31st. This summer is yours for the making, get started at go.skyfall.dev/som-monitor. For teenagers 18 or under."
       },
     });
     const document = window.document;
