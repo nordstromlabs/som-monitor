@@ -16,7 +16,7 @@
     "@slack/web-api": "^7.9.2",
     "arktype": "^2.1.20",
     "croner": "^9.0.0",
-    "happy-dom": "^18.0.1",
+    "happy-dom": "17.1.8",
     "jsx-slack": "^6.1.2"
   },
   "scripts": {
