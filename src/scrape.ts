@@ -27,24 +27,24 @@ export type ShopItems = typeof ShopItems.infer;
 export const regions = [
   {
     code: "US",
-    name: "United States",
+    name: "🇺🇸",
   },
   {
     code: "EU",
-    name: "EU + UK",
+    name: "🇪🇺/🇬🇧",
   },
   {
     code: "IN",
-    name: "India",
+    name: "🇮🇳",
   },
   {
     code: "CA",
-    name: "Canada",
+    name: "🇨🇦",
   },
-  { code: "AU", name: "Australia" },
+  { code: "AU", name: "🇦🇺" },
   {
     code: "XX",
-    name: "Rest of World",
+    name: "🌍",
   },
 ];
 
