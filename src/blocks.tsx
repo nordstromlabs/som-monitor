@@ -33,7 +33,6 @@ function Robot() {
 
 function formatPrices(prices: ShopItem['prices']): string {
     const priceEntries = Object.entries(prices).filter(([_, price]) => price !== undefined) as [string, number][];
-
     if (priceEntries.length === 0) {
         return "Price not available";
     }
@@ -44,10 +43,18 @@ function formatPrices(prices: ShopItem['prices']): string {
         return `${price} (${region?.name || regionCode})`;
     }
 
+    const firstPrice = priceEntries[0]![1];
+    const allSamePrice = priceEntries.every(([_, price]) => price === firstPrice);
+
+    if (allSamePrice) {
+        const xxRegion = regions.find(r => r.code === "XX");
+        return `${firstPrice} (${xxRegion?.name || "XX"})`;
+    }
+
     return priceEntries
         .map(([regionCode, price]) => {
             const region = regions.find(r => r.code === regionCode);
-            return `${region?.name || regionCode}: ${price}`;
+            return `${region?.name || regionCode} ${price}`;
         })
         .join(', ');
 }
