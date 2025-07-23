@@ -195,7 +195,7 @@ export function UsergroupPing({ usergroupId }: { usergroupId: string }) {
     return (
         <Blocks>
             <Context>
-                pinging <a href={`@${usergroupId}`} /> · <a href="https://go.skyfall.dev/som-monitor"><Star /> star the repo!</a> · <a href="https://go.skyfall.dev/converge"><Robot /> discord/slackbot ysws</a>
+                pinging <a href={`@channel`} /> · <a href="https://go.skyfall.dev/som-monitor"><Star /> star the repo!</a> · <a href="https://go.skyfall.dev/converge"><Robot /> discord/slackbot ysws</a>
             </Context>
         </Blocks>
     )
