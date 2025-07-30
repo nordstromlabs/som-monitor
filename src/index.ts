@@ -68,6 +68,25 @@ async function uploadImagesForItems(items: ShopItem[]) {
   }
 }
 
+function shouldNotifyUsergroup(oldItem: ShopItem, newItem: ShopItem): boolean {
+  const ignoreKeys = ["title", "description"];
+  const importantChange = Object.keys(newItem).some((key) => {
+    if (ignoreKeys.includes(key)) return false;
+    const oldVal = (oldItem as any)[key];
+    const newVal = (newItem as any)[key];
+
+    if (key === "stock") {
+      if (typeof oldVal === "number" && typeof newVal === "number") {
+        return Math.abs(oldVal - newVal) > 1;
+      }
+    }
+
+    return !deepEquals(oldVal, newVal);
+  });
+
+  return importantChange;
+}
+
 async function run() {
   try {
     const slack = new WebClient(env.SLACK_XOXB);
@@ -99,6 +118,7 @@ async function run() {
     const newItemNames: string[] = [];
     const updatedItemNames: string[] = [];
     const deletedItemNames: string[] = [];
+    let shouldPingUsergroup = false;
 
     for (const currentItem of currentItems) {
       const oldItem = oldItems.find((item) => item.id === currentItem.id);
@@ -106,6 +126,7 @@ async function run() {
       if (!oldItem) {
         updates.push(JSXSlack(NewItem({ item: currentItem })));
         newItemNames.push(currentItem.title);
+        shouldPingUsergroup = true;
         continue;
       }
 
@@ -115,6 +136,10 @@ async function run() {
 
       updates.push(JSXSlack(UpdatedItem({ oldItem, newItem: currentItem })));
       updatedItemNames.push(oldItem.title);
+
+      if (shouldNotifyUsergroup(oldItem, currentItem)) {
+        shouldPingUsergroup = true;
+      }
     }
 
     for (const oldItem of oldItems) {
@@ -122,6 +147,7 @@ async function run() {
       if (!currentItem) {
         updates.push(JSXSlack(DeletedItem({ item: oldItem })));
         deletedItemNames.push(oldItem.title);
+        shouldPingUsergroup = true;
       }
     }
 
@@ -165,17 +191,19 @@ async function run() {
       }
     }
 
-    await retry(() =>
-      slack.chat.postMessage({
-        text: notificationText,
-        blocks: JSXSlack(
-          UsergroupPing({ usergroupId: env.SLACK_USERGROUP_ID })
-        ),
-        channel: env.SLACK_CHANNEL_ID,
-        unfurl_links: false,
-        unfurl_media: false,
-      })
-    );
+    if (shouldPingUsergroup) {
+      await retry(() =>
+        slack.chat.postMessage({
+          text: notificationText,
+          blocks: JSXSlack(
+            UsergroupPing({ usergroupId: env.SLACK_USERGROUP_ID })
+          ),
+          channel: env.SLACK_CHANNEL_ID,
+          unfurl_links: false,
+          unfurl_media: false,
+        })
+      );
+    }
 
     console.log("🙌 Run completed!");
   } catch (error) {
