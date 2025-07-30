@@ -75,7 +75,7 @@ function shouldNotifyUsergroup(oldItem: ShopItem, newItem: ShopItem): boolean {
     const oldVal = (oldItem as any)[key];
     const newVal = (newItem as any)[key];
 
-    if (key === "stock") {
+    if (key === "stockRemaining") {
       if (typeof oldVal === "number" && typeof newVal === "number") {
         return Math.abs(oldVal - newVal) > 1;
       }
