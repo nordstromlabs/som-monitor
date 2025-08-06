@@ -45,8 +45,9 @@ function formatPrices(prices: ShopItem['prices']): string {
 
     const firstPrice = priceEntries[0]![1];
     const allSamePrice = priceEntries.every(([_, price]) => price === firstPrice);
+    const allRegionsHavePrices = priceEntries.length === regions.length;
 
-    if (allSamePrice) {
+    if (allSamePrice && allRegionsHavePrices) {
         const xxRegion = regions.find(r => r.code === "XX");
         return `${firstPrice} (${xxRegion?.name || "XX"})`;
     }
@@ -57,17 +58,6 @@ function formatPrices(prices: ShopItem['prices']): string {
             return `${region?.name || regionCode} ${price}`;
         })
         .join(', ');
-}
-
-function comparePrices(oldPrices: ShopItem['prices'], newPrices: ShopItem['prices']): boolean {
-    const oldEntries = Object.entries(oldPrices).filter(([_, price]) => price !== undefined);
-    const newEntries = Object.entries(newPrices).filter(([_, price]) => price !== undefined);
-
-    if (oldEntries.length !== newEntries.length) return true;
-
-    return oldEntries.some(([regionCode, oldPrice]) => {
-        return newPrices[regionCode as keyof typeof newPrices] !== oldPrice;
-    });
 }
 
 export function NewItem({ item }: { item: ShopItem }) {
