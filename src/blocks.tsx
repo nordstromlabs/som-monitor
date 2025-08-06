@@ -60,6 +60,17 @@ function formatPrices(prices: ShopItem['prices']): string {
         .join(', ');
 }
 
+function comparePrices(oldPrices: ShopItem['prices'], newPrices: ShopItem['prices']): boolean {
+    const oldEntries = Object.entries(oldPrices).filter(([_, price]) => price !== undefined);
+    const newEntries = Object.entries(newPrices).filter(([_, price]) => price !== undefined);
+
+    if (oldEntries.length !== newEntries.length) return true;
+
+    return oldEntries.some(([regionCode, oldPrice]) => {
+        return newPrices[regionCode as keyof typeof newPrices] !== oldPrice;
+    });
+}
+
 export function NewItem({ item }: { item: ShopItem }) {
     const renderStock = () => {
         if (item.stockRemaining === 0) {
