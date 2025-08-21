@@ -192,11 +192,11 @@ export function UpdatedItem({ oldItem, newItem }: { oldItem: ShopItem; newItem: 
     )
 }
 
-export function UsergroupPing({ usergroupId }: { usergroupId: string }) {
+export function ChannelPing() {
     return (
         <Blocks>
             <Context>
-                pinging <a href={`@${usergroupId}`} /> · <a href="https://go.skyfall.dev/som-monitor"><Star /> star the repo!</a> · <a href="https://go.skyfall.dev/converge"><Robot /> discord/slackbot ysws</a>
+                pinging <a href={`@channel`} /> · <a href="https://go.skyfall.dev/som-monitor"><Star /> star the repo!</a> · <a href="https://minoa.skyfall.dev/project/accgc40ggc8k8sc8os4gc0k8/environment/f08cw8ooks0gkkw4ck4kgos4/application/i8gswkc4w44sscocsooo8oco"><Robot /> view the backend?</a>
             </Context>
         </Blocks>
     )

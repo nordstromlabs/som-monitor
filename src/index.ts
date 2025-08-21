@@ -1,6 +1,6 @@
 import { type } from "arktype";
 import { scrape, ShopItems, type ShopItem } from "./scrape";
-import { DeletedItem, NewItem, UpdatedItem, UsergroupPing } from "./blocks";
+import { DeletedItem, NewItem, UpdatedItem, ChannelPing } from "./blocks";
 import { JSXSlack } from "jsx-slack";
 import { readFile, writeFile, exists } from "node:fs/promises";
 import { deepEquals } from "bun";
@@ -12,7 +12,6 @@ const envSchema = type({
   SOM_COOKIE: "string",
   SLACK_CHANNEL_ID: "string",
   SLACK_XOXB: "string",
-  SLACK_USERGROUP_ID: "string",
   OLD_ITEMS_PATH: "string = 'items.json'",
   BLOCKS_LOG_PATH: "string?",
   SENTRY_DSN: "string?",
@@ -195,9 +194,7 @@ async function run() {
       await retry(() =>
         slack.chat.postMessage({
           text: notificationText,
-          blocks: JSXSlack(
-            UsergroupPing({ usergroupId: env.SLACK_USERGROUP_ID })
-          ),
+          blocks: JSXSlack(ChannelPing()),
           channel: env.SLACK_CHANNEL_ID,
           unfurl_links: false,
           unfurl_media: false,
