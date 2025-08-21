@@ -41,7 +41,8 @@ async function retry<T>(
       lastError = error as Error;
       if (i < retries - 1) {
         console.warn(`Attempt ${i + 1} failed. Retrying in ${delay}ms...`);
-        await new Promise((resolve) => setTimeout(resolve, delay));
+        Sentry.captureException(error);
+        await Bun.sleep(delay);
       }
     }
   }
