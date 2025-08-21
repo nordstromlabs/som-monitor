@@ -67,7 +67,7 @@ async function uploadImagesForItems(items: ShopItem[]) {
   }
 }
 
-function shouldNotifyUsergroup(oldItem: ShopItem, newItem: ShopItem): boolean {
+function shouldNotifyChannel(oldItem: ShopItem, newItem: ShopItem): boolean {
   const ignoreKeys = ["title", "description"];
   const importantChange = Object.keys(newItem).some((key) => {
     if (ignoreKeys.includes(key)) return false;
@@ -117,7 +117,7 @@ async function run() {
     const newItemNames: string[] = [];
     const updatedItemNames: string[] = [];
     const deletedItemNames: string[] = [];
-    let shouldPingUsergroup = false;
+    let shouldPingChannel = false;
 
     for (const currentItem of currentItems) {
       const oldItem = oldItems.find((item) => item.id === currentItem.id);
@@ -125,7 +125,7 @@ async function run() {
       if (!oldItem) {
         updates.push(JSXSlack(NewItem({ item: currentItem })));
         newItemNames.push(currentItem.title);
-        shouldPingUsergroup = true;
+        shouldPingChannel = true;
         continue;
       }
 
@@ -136,8 +136,8 @@ async function run() {
       updates.push(JSXSlack(UpdatedItem({ oldItem, newItem: currentItem })));
       updatedItemNames.push(oldItem.title);
 
-      if (shouldNotifyUsergroup(oldItem, currentItem)) {
-        shouldPingUsergroup = true;
+      if (shouldNotifyChannel(oldItem, currentItem)) {
+        shouldPingChannel = true;
       }
     }
 
@@ -146,7 +146,7 @@ async function run() {
       if (!currentItem) {
         updates.push(JSXSlack(DeletedItem({ item: oldItem })));
         deletedItemNames.push(oldItem.title);
-        shouldPingUsergroup = true;
+        shouldPingChannel = true;
       }
     }
 
@@ -170,6 +170,9 @@ async function run() {
     const notificationText = `✨ ${notificationTexts.join(" · ")}`;
 
     const allBlocks = updates.flat();
+    if (shouldPingChannel) {
+      allBlocks.push(JSXSlack(ChannelPing()));
+    }
     if (allBlocks.length === 0) throw new Error("Updates were detected, but we have no update blocks. This should never happen.");
 
     for (let i = 0; i < allBlocks.length; i += SLACK_BLOCK_LIMIT) {
@@ -188,18 +191,6 @@ async function run() {
           `Failed to send chunked Slack message: ${result.error}`
         );
       }
-    }
-
-    if (shouldPingUsergroup) {
-      await retry(() =>
-        slack.chat.postMessage({
-          text: notificationText,
-          blocks: JSXSlack(ChannelPing()),
-          channel: env.SLACK_CHANNEL_ID,
-          unfurl_links: false,
-          unfurl_media: false,
-        })
-      );
     }
 
     console.log("🙌 Run completed!");
