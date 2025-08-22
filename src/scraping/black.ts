@@ -1,8 +1,8 @@
 import { Window } from "happy-dom";
 import { BaseScraper, ShopItems } from ".";
-import { SOM_ROOT_DOMAIN } from "../constants";
+import { SOM_ROOT_URL } from "../constants";
 
-const SHOP_URL = `${SOM_ROOT_DOMAIN}/shop/black_market`;
+const SHOP_URL = `${SOM_ROOT_URL}/shop/black_market`;
 
 export class BlackMarketScraper extends BaseScraper {
   constructor(cookie: string) {
@@ -53,7 +53,10 @@ export class BlackMarketScraper extends BaseScraper {
       if (!priceAttr) {
         throw new Error("Price attribute not found");
       }
-      const price = parseInt(priceAttr);
+      const price = Number.parseInt(priceAttr, 10);
+      if (!Number.isFinite(price)) {
+        throw new Error(`Invalid price attribute: "${priceAttr}"`);
+      }
 
       return {
         title,
@@ -69,6 +72,6 @@ export class BlackMarketScraper extends BaseScraper {
       };
     });
 
-    return items;
+    return ShopItems.assert(items);
   }
 }

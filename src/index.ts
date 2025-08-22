@@ -1,5 +1,5 @@
 import { type } from "arktype";
-import { SOM_ROOT_DOMAIN } from "./constants";
+import { SOM_ROOT_URL } from "./constants";
 import { ShopItems, type ShopItem } from "./scraping";
 import { scrapeAll } from "./scraping/scrapeAll";
 import { DeletedItem, NewItem, UpdatedItem, ChannelPing } from "./blocks";
@@ -21,7 +21,7 @@ const envSchema = type({
   BLOCKS_LOG_PATH: "string?",
   SENTRY_DSN: "string?",
 });
-export const env = envSchema.assert(process.env);
+const env = envSchema.assert(process.env);
 
 if (env.SENTRY_DSN) {
   Sentry.init({
@@ -130,7 +130,7 @@ async function run() {
   try {
     const slack = new WebClient(env.SLACK_XOXB);
 
-    const currentItems = await retry(() => scrapeAll());
+    const currentItems = await retry(() => scrapeAll(env.SOM_COOKIE));
     await uploadImagesForItems(currentItems);
 
     const oldItems = await readItems();
