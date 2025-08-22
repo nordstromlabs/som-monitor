@@ -1,4 +1,3 @@
-import { execSync } from "node:child_process";
 import { type ShopItem } from "./scrape";
 import { regions } from "./scrape";
 import { Blocks, Header, Section, Image, Context } from 'jsx-slack';
