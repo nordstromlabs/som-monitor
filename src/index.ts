@@ -1,5 +1,5 @@
 import { type } from "arktype";
-import { scrape, ShopItems, type ShopItem } from "./scrape";
+import { scrapeAll, ShopItems, type ShopItem } from "./scraping";
 import { DeletedItem, NewItem, UpdatedItem, ChannelPing } from "./blocks";
 import { JSXSlack } from "jsx-slack";
 import { readFile, writeFile, exists } from "node:fs/promises";
@@ -16,7 +16,7 @@ const envSchema = type({
   BLOCKS_LOG_PATH: "string?",
   SENTRY_DSN: "string?",
 });
-const env = envSchema.assert(process.env);
+export const env = envSchema.assert(process.env);
 
 if (env.SENTRY_DSN) {
   Sentry.init({
@@ -91,7 +91,7 @@ async function run() {
   try {
     const slack = new WebClient(env.SLACK_XOXB);
 
-    const currentItems = await retry(() => scrape(env.SOM_COOKIE));
+    const currentItems = await retry(() => scrapeAll());
     await uploadImagesForItems(currentItems);
 
     if (!(await exists(env.OLD_ITEMS_PATH))) {

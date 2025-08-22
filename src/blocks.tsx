@@ -1,5 +1,5 @@
-import { type ShopItem } from "./scrape";
-import { regions } from "./scrape";
+import { type ShopItem } from "./scraping";
+import { regions } from "./scraping";
 import { Blocks, Header, Section, Image, Context } from 'jsx-slack';
 
 function Shells() {
@@ -30,6 +30,10 @@ function Robot() {
     return <>:robot_face:</>
 }
 
+function Spy() {
+    return <>:blobhaj-spy:</>
+}
+
 function formatPrices(prices: ShopItem['prices']): string {
     const priceEntries = Object.entries(prices).filter(([_, price]) => price !== undefined) as [string, number][];
     if (priceEntries.length === 0) {
@@ -57,6 +61,10 @@ function formatPrices(prices: ShopItem['prices']): string {
             return `${region?.name || regionCode} ${price}`;
         })
         .join(', ');
+}
+
+function blackMarketMarker() {
+    return <><Spy/> <b>Black Market</b></>
 }
 
 function comparePrices(oldPrices: ShopItem['prices'], newPrices: ShopItem['prices']): boolean {
