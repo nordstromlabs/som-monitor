@@ -1,6 +1,7 @@
 import { type } from "arktype";
 import { env } from "../"
 import { RegularScraper } from "./regular";
+import { BlackMarketScraper } from "./black";
 
 export const regions = [
   {
@@ -65,7 +66,7 @@ export class BaseScraper {
   }
 }
 
-const scrapers = [new RegularScraper()]
+const scrapers = [new RegularScraper(), new BlackMarketScraper()]
 export async function scrapeAll(): Promise<ShopItems> {
   const results = await Promise.all(scrapers.map(scraper => scraper.scrape()));
   return results.flat()
