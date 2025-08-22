@@ -64,7 +64,7 @@ function formatPrices(prices: ShopItem['prices']): string {
 }
 
 function blackMarketMarker() {
-    return <><Spy/> <b>Black Market</b></>
+    return <><Spy /> <b>Black Market</b></>
 }
 
 function comparePrices(oldPrices: ShopItem['prices'], newPrices: ShopItem['prices']): boolean {
@@ -99,6 +99,7 @@ export function NewItem({ item }: { item: ShopItem }) {
                     <i>{item.description}</i>
                 ) : null}<br />
                 {renderStock()}<br /><br />
+                {item.isBlackMarket ? blackMarketMarker() : null}<br /><br />
 
                 {showBuy && (
                     <a href={item.purchaseUrl}><b><Trolley /> Buy</b></a>
@@ -175,6 +176,8 @@ export function UpdatedItem({ oldItem, newItem }: { oldItem: ShopItem; newItem: 
                     ? `${oldItem.description || "_no description_"} → ${newItem.description || "_no description_"}`
                     : newItem.description}{' '}<br />
                 {renderStock()}<br /><br />
+                {newItem.isBlackMarket ? blackMarketMarker() : null}<br /><br />
+
                 {showBuy && (
                     <a href={newItem.purchaseUrl}><b><Trolley /> Buy</b></a>
                 )}

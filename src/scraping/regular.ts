@@ -1,6 +1,7 @@
 import { Window } from "happy-dom";
 import { type } from "arktype";
-import { BaseScraper, ShopItem, ShopItems, SOM_ROOT_DOMAIN, regions } from ".";
+import { BaseScraper, ShopItem, ShopItems, regions } from ".";
+import { SOM_ROOT_DOMAIN } from "../constants";
 
 const SHOP_URL = `${SOM_ROOT_DOMAIN}/shop`;
 
@@ -17,8 +18,8 @@ interface SingleRegionItemEntry {
 }
 
 export class RegularScraper extends BaseScraper {
-  constructor() {
-    super();
+  constructor(cookie: string) {
+    super(cookie);
   }
 
   override async scrape(): Promise<ShopItems> {
@@ -39,7 +40,6 @@ export class RegularScraper extends BaseScraper {
         throw new Error(shopItems.summary);
       }
 
-      console.log(`🎉 Found ${shopItems.length} items across ${regions.length} regions.`);
       return shopItems;
     } catch (error) {
       console.error('Error during parallel scraping:', error);

@@ -1,11 +1,12 @@
 import { Window } from "happy-dom";
-import { BaseScraper, ShopItem, ShopItems, SOM_ROOT_DOMAIN, regions } from ".";
+import { BaseScraper, ShopItems } from ".";
+import { SOM_ROOT_DOMAIN } from "../constants";
 
 const SHOP_URL = `${SOM_ROOT_DOMAIN}/shop/black_market`;
 
 export class BlackMarketScraper extends BaseScraper {
-  constructor() {
-    super();
+  constructor(cookie: string) {
+    super(cookie);
   }
 
   override async scrape(): Promise<ShopItems> {
@@ -29,8 +30,8 @@ export class BlackMarketScraper extends BaseScraper {
         throw new Error("Title element not found");
       }
 
-      const description = Array.from(row.childNodes)
-        .filter(node => node.nodeType === Node.TEXT_NODE)
+      const description = Array.from(row.querySelector(".shop-item-description")?.childNodes || [])
+        .filter(node => node.nodeType === 3) // Node.TEXT_NODE
         .map(node => node.textContent.trim())
         .join("");
 
