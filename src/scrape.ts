@@ -75,7 +75,7 @@ async function scrapeRegion(regionCode: string, cookie: string): Promise<RegionS
     const document = window.document;
     document.body.innerHTML = await response.text();
     const grids = document.querySelectorAll(".sm\\:grid");
-    
+
     if (grids.length === 0) {
       throw new Error(
         `Grid elements not found whilst looking at items for ${regionCode}`,
@@ -92,28 +92,28 @@ async function scrapeRegion(regionCode: string, cookie: string): Promise<RegionS
             | HTMLImageElement
             | undefined
         )?.src?.trim();
-        
+
         const description = child
           .querySelector("div.mb-4 > p.text-gray-700")
           ?.textContent?.trim();
-        
+
         const priceEl = child
           .querySelector(
             "div.absolute.top-2.right-2.text-lg.font-bold.whitespace-nowrap.flex.items-center > picture",
           )
           ?.parentElement?.textContent?.trim()
           ?.replaceAll(",", "");
-        
+
         if (!priceEl) {
           throw new Error(
             `Price element not found for region ${regionCode}. Has the shop page code updated?`,
           );
         }
-        
+
         const price = Number(priceEl) || 0;
         const purchaseUrl = child.querySelector("form")?.action?.trim();
         if (!purchaseUrl) continue;
-        
+
         const id = Number(purchaseUrl.replace(/[^0-9]/g, ""));
 
         const isOutOfStock = !!child.querySelector("p.text-red-600");
@@ -149,7 +149,7 @@ function mergeRegionItems(allRegionItems: RegionShopItem[]): Map<number, ShopIte
 
   for (const item of allRegionItems) {
     const { regionCode, price, ...itemData } = item;
-    
+
     if (results.has(item.id)) {
       const existing = results.get(item.id)!;
       // merge prices from different regions
@@ -177,17 +177,17 @@ function mergeRegionItems(allRegionItems: RegionShopItem[]): Map<number, ShopIte
 /// that's for the differ to do -- that way, we don't perform extra work
 export async function scrape(cookie: string): Promise<ShopItems> {
   // Scrape all regions in parallel
-  const regionPromises = regions.map(region => 
+  const regionPromises = regions.map(region =>
     scrapeRegion(region.code, cookie)
   );
 
   try {
     const allRegionResults = await Promise.all(regionPromises);
     const allRegionItems = allRegionResults.flat();
-    
+
     // merge items by ID, combining prices from all the different regions
     const results = mergeRegionItems(allRegionItems);
-    
+
     const shopItems = ShopItems(Array.from(results.values()));
     if (shopItems instanceof type.errors) {
       throw new Error(shopItems.summary);
