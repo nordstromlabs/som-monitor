@@ -1,5 +1,7 @@
 import { type } from "arktype";
-import { scrapeAll, ShopItems, type ShopItem } from "./scraping";
+import { SOM_ROOT_DOMAIN } from "./constants";
+import { ShopItems, type ShopItem } from "./scraping";
+import { scrapeAll } from "./scraping/scrapeAll";
 import { DeletedItem, NewItem, UpdatedItem, ChannelPing } from "./blocks";
 import { JSXSlack } from "jsx-slack";
 import { readFile, writeFile, exists } from "node:fs/promises";
@@ -38,6 +40,7 @@ async function retry<T>(
     try {
       return await fn();
     } catch (error) {
+      console.error(error)
       lastError = error as Error;
       if (i < retries - 1) {
         console.warn(`Attempt ${i + 1} failed. Retrying in ${delay}ms...`);
