@@ -204,10 +204,10 @@ async function run() {
     }
     const notificationText = `✨ ${notificationTexts.join(" · ")}`;
 
-    const allBlocks = updates.flat();
     if (shouldPingChannel) {
-      allBlocks.push(JSXSlack(ChannelPing()));
+      updates.push(JSXSlack(ChannelPing()));
     }
+    const allBlocks = updates.flat();
     if (allBlocks.length === 0) throw new Error("Updates were detected, but we have no update blocks. This should never happen.");
 
     for (let i = 0; i < allBlocks.length; i += SLACK_BLOCK_LIMIT) {
