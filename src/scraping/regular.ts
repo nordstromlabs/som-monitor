@@ -1,9 +1,9 @@
 import { Window } from "happy-dom";
 import { type } from "arktype";
 import { BaseScraper, ShopItem, ShopItems, regions } from ".";
-import { SOM_ROOT_DOMAIN } from "../constants";
+import { SOM_ROOT_URL } from "../constants";
 
-const SHOP_URL = `${SOM_ROOT_DOMAIN}/shop`;
+const SHOP_URL = `${SOM_ROOT_URL}/shop`;
 
 interface SingleRegionItemEntry {
   title: string;

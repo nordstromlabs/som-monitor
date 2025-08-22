@@ -99,7 +99,7 @@ export function NewItem({ item }: { item: ShopItem }) {
                     <i>{item.description}</i>
                 ) : null}<br />
                 {renderStock()}<br /><br />
-                {item.isBlackMarket ? blackMarketMarker() : null}<br /><br />
+                {item.isBlackMarket && (<>{blackMarketMarker()}<br /><br /></>)}
 
                 {showBuy && (
                     <a href={item.purchaseUrl}><b><Trolley /> Buy</b></a>
@@ -122,7 +122,8 @@ export function DeletedItem({ item }: { item: ShopItem }) {
             <Section>
                 {item.description && item.description !== "" ?
                     (<i>{item.description}</i>)
-                    : null}
+                    : null}<br />
+                {item.isBlackMarket && (<>{blackMarketMarker()}<br /><br /></>)}
             </Section>
             {item.imageUrl ? <Image
                 src={item.imageUrl}
@@ -176,7 +177,7 @@ export function UpdatedItem({ oldItem, newItem }: { oldItem: ShopItem; newItem: 
                     ? `${oldItem.description || "_no description_"} → ${newItem.description || "_no description_"}`
                     : newItem.description}{' '}<br />
                 {renderStock()}<br /><br />
-                {newItem.isBlackMarket ? blackMarketMarker() : null}<br /><br />
+                {newItem.isBlackMarket && (<>{blackMarketMarker()}<br /><br /></>)}
 
                 {showBuy && (
                     <a href={newItem.purchaseUrl}><b><Trolley /> Buy</b></a>
