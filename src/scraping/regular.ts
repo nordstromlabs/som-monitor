@@ -17,11 +17,8 @@ interface SingleRegionItemEntry {
 }
 
 export class RegularScraper extends BaseScraper {
-  private window: Window;
-
   constructor() {
     super();
-    this.window = new Window({ url: SHOP_URL });
   }
 
   override async scrape(): Promise<ShopItems> {
@@ -52,13 +49,14 @@ export class RegularScraper extends BaseScraper {
 
   async scrapeRegion(regionCode: string): Promise<SingleRegionItemEntry[]> {
     const regionItems: SingleRegionItemEntry[] = [];
+    const window = new Window({ url: SHOP_URL });
 
     try {
       const response = await fetch(`${SHOP_URL}?region=${regionCode}`, {
         headers: this.headers,
       });
 
-      const document = this.window.document;
+      const document = window.document;
       document.body.innerHTML = await response.text();
       const grids = document.querySelectorAll(".sm\\:grid");
 
