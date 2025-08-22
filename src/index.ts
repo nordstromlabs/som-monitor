@@ -1,5 +1,4 @@
 import { type } from "arktype";
-import { SOM_ROOT_URL } from "./constants";
 import { ShopItems, type ShopItem } from "./scraping";
 import { scrapeAll } from "./scraping/scrapeAll";
 import { DeletedItem, NewItem, UpdatedItem, ChannelPing } from "./blocks";
@@ -7,7 +6,6 @@ import { JSXSlack } from "jsx-slack";
 import { readFile, writeFile, exists } from "node:fs/promises";
 import { deepEquals } from "bun";
 import { WebClient } from "@slack/web-api";
-import { Cron } from "croner";
 import * as Sentry from "@sentry/bun";
 
 let cachedItems: ShopItem[] | null = null;
@@ -20,6 +18,7 @@ const envSchema = type({
   OLD_ITEMS_PATH: "string = 'items.json'",
   BLOCKS_LOG_PATH: "string?",
   SENTRY_DSN: "string?",
+  MASTER_KEY: "string",
 });
 const env = envSchema.assert(process.env);
 
@@ -236,9 +235,6 @@ async function run() {
   }
 }
 
-new Cron("* * * * *", { maxRuns: 1, name: "shop-scraper" }, run);
-run();
-
 Bun.serve({
   routes: {
     "/": Response.redirect("https://go.skyfall.dev/som-monitor"),
@@ -249,6 +245,21 @@ Bun.serve({
         });
       }
       return new Response(Bun.file(env.OLD_ITEMS_PATH));
+    },
+    "/api/check": async (request) => {
+      const authHeader = request.headers.get("Authorization");
+
+      if (!authHeader || authHeader !== `Bearer ${env.MASTER_KEY}`) {
+        return new Response("Unauthorized", { status: 401 });
+      }
+
+      try {
+        await run();
+        return new Response("Check completed successfully", { status: 200 });
+      } catch (error) {
+        console.error("Error during manual check:", error);
+        return new Response(`Internal server error: ${error}`, { status: 500 });
+      }
     },
   },
   port: 8080
