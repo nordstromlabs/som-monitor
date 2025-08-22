@@ -8,6 +8,14 @@ SOM Monitor is a monitor for Hack Club's [Summer of Making Shop.](https://summer
 
 To get started, simply join the [#som-monitor](https://hackclub.slack.com/archives/C091PEQP7CJ) channel on Slack.
 
+To **use the API**:
+
+```bash
+curl https://summer.skyfall.dev/api/shop
+```
+
+Please give credit to SOM Monitor if you use this.
+
 ## Development
 
 To install dependencies:
