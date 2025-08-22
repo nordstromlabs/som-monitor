@@ -10,6 +10,9 @@ import { WebClient } from "@slack/web-api";
 import { Cron } from "croner";
 import * as Sentry from "@sentry/bun";
 
+let cachedItems: ShopItem[] | null = null;
+let hasReadFromDisk = false;
+
 const envSchema = type({
   SOM_COOKIE: "string",
   SLACK_CHANNEL_ID: "string",
@@ -29,6 +32,39 @@ if (env.SENTRY_DSN) {
 }
 
 const SLACK_BLOCK_LIMIT = 50;
+
+async function readItems(): Promise<ShopItem[] | null> {
+  if (hasReadFromDisk && cachedItems !== null) {
+    return cachedItems;
+  }
+
+  if (!(await exists(env.OLD_ITEMS_PATH))) {
+    return null;
+  }
+
+  try {
+    const fileContent = await readFile(env.OLD_ITEMS_PATH, { encoding: "utf-8" });
+    const parsed = ShopItems(JSON.parse(fileContent));
+
+    if (parsed instanceof type.errors) {
+      throw new Error(parsed.summary);
+    }
+
+    cachedItems = parsed;
+    hasReadFromDisk = true;
+
+    return parsed;
+  } catch (error) {
+    console.error("Error reading items from disk:", error);
+    throw error;
+  }
+}
+
+async function writeItems(newItems: ShopItem[]) {
+  await writeFile(env.OLD_ITEMS_PATH, JSON.stringify(newItems, null, 2));
+  cachedItems = newItems;
+  hasReadFromDisk = true;
+}
 
 async function retry<T>(
   fn: () => Promise<T>,
@@ -97,19 +133,14 @@ async function run() {
     const currentItems = await retry(() => scrapeAll());
     await uploadImagesForItems(currentItems);
 
-    if (!(await exists(env.OLD_ITEMS_PATH))) {
+    const oldItems = await readItems();
+
+    if (oldItems === null) {
       await writeItems(currentItems);
       console.log(
         `👋 First sync successful! Writing to \`${env.OLD_ITEMS_PATH}\``
       );
       return;
-    }
-
-    const oldItems = ShopItems(
-      JSON.parse(await readFile(env.OLD_ITEMS_PATH, { encoding: "utf-8" }))
-    );
-    if (oldItems instanceof type.errors) {
-      throw new Error(oldItems.summary);
     }
 
     if (deepEquals(oldItems, currentItems)) {
@@ -208,9 +239,20 @@ async function run() {
 new Cron("* * * * *", { maxRuns: 1, name: "shop-scraper" }, run);
 run();
 
-async function writeItems(newItems: ShopItem[]) {
-  await writeFile(env.OLD_ITEMS_PATH, JSON.stringify(newItems, null, 2));
-}
+Bun.serve({
+  routes: {
+    "/": Response.redirect("https://go.skyfall.dev/som-monitor"),
+    "/api/shop": async () => {
+      if (cachedItems !== null) {
+        return new Response(JSON.stringify(cachedItems, null, 2), {
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+      return new Response(Bun.file(env.OLD_ITEMS_PATH));
+    },
+  },
+  port: 8080
+})
 
 const cdnResponseSchema = type({
   files: type({
