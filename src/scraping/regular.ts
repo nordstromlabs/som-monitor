@@ -1,4 +1,4 @@
-import { Window } from "happy-dom";
+import { parseHTML } from "linkedom";
 import { type } from "arktype";
 import { BaseScraper, ShopItem, ShopItems, regions } from ".";
 import { SOM_ROOT_URL } from "../constants";
@@ -49,15 +49,14 @@ export class RegularScraper extends BaseScraper {
 
   async scrapeRegion(regionCode: string): Promise<SingleRegionItemEntry[]> {
     const regionItems: SingleRegionItemEntry[] = [];
-    const window = new Window({ url: SHOP_URL });
 
     try {
       const response = await fetch(`${SHOP_URL}?region=${regionCode}`, {
         headers: this.headers,
       });
 
-      const document = window.document;
-      document.body.innerHTML = await response.text();
+      const html = await response.text();
+      const { document } = parseHTML(html);
       const grids = document.querySelectorAll(".sm\\:grid");
 
       if (grids.length === 0) {
@@ -66,16 +65,18 @@ export class RegularScraper extends BaseScraper {
         );
       }
 
-      for (const grid of grids) {
-        for (const child of grid.children) {
+      for (const grid of Array.from(grids)) {
+        for (const child of Array.from(grid.children)) {
           const title = child.querySelector("h3")?.textContent?.trim();
           if (!title) continue;
 
-          const imageUrl = (
-            child.querySelector("img.rounded-lg") as unknown as
+          const imageElement = child.querySelector("img.rounded-lg") as unknown as
             | HTMLImageElement
-            | undefined
-          )?.src?.trim();
+            | undefined;
+          const imageUrlRaw = imageElement?.getAttribute('src')?.trim();
+          const resolvedImageUrl = imageUrlRaw && !imageUrlRaw.startsWith('http')
+            ? new URL(imageUrlRaw, SOM_ROOT_URL).toString()
+            : imageUrlRaw;
 
           const description = child
             .querySelector("div.mb-4 > p.text-gray-700")
@@ -95,8 +96,12 @@ export class RegularScraper extends BaseScraper {
           }
 
           const price = Number(priceEl) || 0;
-          const purchaseUrl = child.querySelector("form")?.action?.trim();
-          if (!purchaseUrl) continue;
+          const purchaseUrlRaw = child.querySelector("form")?.getAttribute('action')?.trim();
+          if (!purchaseUrlRaw) continue;
+
+          const purchaseUrl = purchaseUrlRaw.startsWith('http')
+            ? purchaseUrlRaw
+            : new URL(purchaseUrlRaw, SOM_ROOT_URL).toString();
 
           const id = Number(purchaseUrl.replace(/[^0-9]/g, ""));
 
@@ -110,7 +115,7 @@ export class RegularScraper extends BaseScraper {
 
           regionItems.push({
             title,
-            imageUrl,
+            imageUrl: resolvedImageUrl,
             description,
             price,
             purchaseUrl,

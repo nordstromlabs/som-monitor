@@ -262,7 +262,8 @@ Bun.serve({
       }
     },
   },
-  port: 8080
+  port: 8080,
+  idleTimeout: 22
 })
 
 const cdnResponseSchema = type({
