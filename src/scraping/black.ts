@@ -45,14 +45,16 @@ export class BlackMarketScraper extends BaseScraper {
         ? new URL(imageUrlRaw, SOM_ROOT_URL).toString()
         : imageUrlRaw || undefined;
 
-      const purchaseUrlRaw = row.querySelector("form")?.getAttribute('action')?.trim();
-      if (!purchaseUrlRaw) {
-        throw new Error("Purchase URL element not found");
+      const idAttr = row.getAttribute("data-item-id");
+      if (!idAttr) {
+        throw new Error("ID attribute not found");
       }
-      const purchaseUrl = purchaseUrlRaw.startsWith('http')
-        ? purchaseUrlRaw
-        : new URL(purchaseUrlRaw, SOM_ROOT_URL).toString();
-      const id = Number(purchaseUrl.replace(/[^0-9]/g, ""));
+      const id = Number.parseInt(idAttr, 10);
+      if (!Number.isFinite(id)) {
+        throw new Error(`Invalid ID attribute: "${idAttr}"`);
+      }
+
+      const purchaseUrl = `${SOM_ROOT_URL}/shop/items/${id}/buy`;
 
       const priceAttr = row.getAttribute("data-item-price");
       if (!priceAttr) {
