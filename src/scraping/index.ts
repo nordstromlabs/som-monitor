@@ -45,6 +45,46 @@ export type ShopItem = typeof ShopItem.infer;
 export const ShopItems = ShopItem.array();
 export type ShopItems = typeof ShopItems.infer;
 
+export interface SingleRegionItemEntry {
+  title: string;
+  imageUrl?: string;
+  description?: string;
+  price: number;
+  purchaseUrl: string;
+  id: number;
+  stockRemaining?: number;
+  regionCode: string;
+  isBlackMarket: boolean;
+}
+
+export function mergeRegionItems(allRegionItems: SingleRegionItemEntry[]): Map<number, ShopItem> {
+  const results = new Map<number, ShopItem>();
+
+  for (const item of allRegionItems) {
+    const { regionCode, price, ...itemData } = item;
+
+    if (results.has(item.id)) {
+      const existing = results.get(item.id)!;
+      results.set(item.id, {
+        ...existing,
+        prices: {
+          ...existing.prices,
+          [regionCode]: price,
+        },
+      });
+    } else {
+      results.set(item.id, {
+        ...itemData,
+        prices: {
+          [regionCode]: price,
+        },
+      });
+    }
+  }
+
+  return results;
+}
+
 export class BaseScraper {
   protected headers: { [key: string]: string };
 
@@ -58,5 +98,27 @@ export class BaseScraper {
 
   async scrape(): Promise<ShopItems> {
     throw new Error("Unimplemented.")
+  }
+
+  protected async scrapeAllRegions<T extends SingleRegionItemEntry>(
+    scrapeRegionFn: (regionCode: string) => Promise<T[]>
+  ): Promise<ShopItems> {
+    const regionPromises = regions.map(region => scrapeRegionFn(region.code));
+
+    try {
+      const allRegionResults = await Promise.all(regionPromises);
+      const allRegionItems = allRegionResults.flat();
+      const results = mergeRegionItems(allRegionItems);
+      const shopItems = ShopItems(Array.from(results.values()));
+      
+      if (shopItems instanceof type.errors) {
+        throw new Error(shopItems.summary);
+      }
+
+      return shopItems;
+    } catch (error) {
+      console.error('Error during parallel scraping:', error);
+      throw error;
+    }
   }
 }
