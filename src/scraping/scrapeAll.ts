@@ -6,6 +6,6 @@ export async function scrapeAll(cookie: string): Promise<ShopItems> {
   const scrapers = [new RegularScraper(cookie), new BlackMarketScraper(cookie)];
   const results = await Promise.all(scrapers.map(scraper => scraper.scrape()));
   const flat = results.flat();
-  console.log(`🎉 Found ${flat.length} items with ${scrapers.length} scrapers and ${Object.keys(regions).length} regions.`);
+  console.log(`🎉 Found ${flat.length} items with ${scrapers.length} scrapers and ${regions.length} regions.`);
   return flat;
 }
