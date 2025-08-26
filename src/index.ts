@@ -212,7 +212,8 @@ async function run() {
       updates.push(JSXSlack(ChannelPing()));
     }
     const allBlocks = updates.flat();
-    if (allBlocks.length === 0) throw new Error("Updates were detected, but we have no update blocks. This should never happen.");
+    // Can happen if the only update was the user buying a free item!
+    if (allBlocks.length === 0) return;
 
     for (let i = 0; i < allBlocks.length; i += SLACK_BLOCK_LIMIT) {
       const chunk = allBlocks.slice(i, i + SLACK_BLOCK_LIMIT);
