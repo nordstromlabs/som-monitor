@@ -1,8 +1,12 @@
 import { parseHTML } from "linkedom";
-import { BaseScraper, ShopItems } from ".";
+import { BaseScraper, ShopItems, type SingleRegionItemEntry } from ".";
 import { SOM_ROOT_URL } from "../constants";
 
 const SHOP_URL = `${SOM_ROOT_URL}/shop/black_market`;
+
+interface BlackMarketItemEntry extends Omit<SingleRegionItemEntry, 'isBlackMarket'> {
+  isBlackMarket: true;
+}
 
 export class BlackMarketScraper extends BaseScraper {
   constructor(cookie: string) {
@@ -10,12 +14,16 @@ export class BlackMarketScraper extends BaseScraper {
   }
 
   override async scrape(): Promise<ShopItems> {
-    const response = await fetch(SHOP_URL, {
+    return this.scrapeAllRegions(this.scrapeRegion.bind(this));
+  }
+
+  async scrapeRegion(regionCode: string): Promise<BlackMarketItemEntry[]> {
+    const response = await fetch(`${SHOP_URL}?region=${regionCode}`, {
       headers: this.headers,
     });
 
     if (response.redirected) {
-      throw new Error("Request was redirected");
+      throw new Error(`Request was redirected for region ${regionCode}`);
     }
 
     const html = await response.text();
@@ -23,10 +31,10 @@ export class BlackMarketScraper extends BaseScraper {
 
     const list = document.querySelector("body > div.container > main > div");
     if (!list) {
-      throw new Error("List element not found");
+      throw new Error(`List element not found for region ${regionCode}`);
     }
 
-    const items: ShopItems = Array.from(list.children).map(row => {
+    const items: BlackMarketItemEntry[] = Array.from(list.children).map(row => {
       const title = row.querySelector(".shop-item-title")?.textContent?.trim();
       if (!title) {
         throw new Error("Title element not found");
@@ -77,12 +85,11 @@ export class BlackMarketScraper extends BaseScraper {
         stockRemaining,
         imageUrl,
         isBlackMarket: true,
-        prices: {
-          XX: price
-        }
+        regionCode,
+        price
       };
     });
 
-    return ShopItems.assert(items);
+    return items;
   }
 }
