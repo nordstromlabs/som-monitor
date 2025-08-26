@@ -106,6 +106,11 @@ async function uploadImagesForItems(items: ShopItem[]) {
   }
 }
 
+function isItemFree(item: ShopItem): boolean {
+  const prices = Object.values(item.prices);
+  return prices.length > 0 && prices.every(price => price === 0);
+}
+
 function shouldNotifyChannel(oldItem: ShopItem, newItem: ShopItem): boolean {
   const ignoreKeys = ["title", "description"];
   const importantChange = Object.keys(newItem).some((key) => {
@@ -177,7 +182,7 @@ async function run() {
 
     for (const oldItem of oldItems) {
       const currentItem = currentItems.find((item) => item.id === oldItem.id);
-      if (!currentItem) {
+      if (!currentItem && !isItemFree(oldItem)) {
         updates.push(JSXSlack(DeletedItem({ item: oldItem })));
         deletedItemNames.push(oldItem.title);
         shouldPingChannel = true;
