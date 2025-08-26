@@ -45,6 +45,17 @@ export type ShopItem = typeof ShopItem.infer;
 export const ShopItems = ShopItem.array();
 export type ShopItems = typeof ShopItems.infer;
 
+export const regions = [
+  { code: "US", name: "🇺🇸" },
+  { code: "EU", name: "🇪🇺/🇬🇧" },
+  { code: "IN", name: "🇮🇳" },
+  { code: "CA", name: "🇨🇦" },
+  { code: "AU", name: "🇦🇺" },
+  { code: "XX", name: "🌍" },
+] as const;
+
+export type RegionCode = typeof regions[number]["code"];
+
 export interface SingleRegionItemEntry {
   title: string;
   imageUrl?: string;
@@ -53,7 +64,7 @@ export interface SingleRegionItemEntry {
   purchaseUrl: string;
   id: number;
   stockRemaining?: number;
-  regionCode: string;
+  regionCode: RegionCode;
   isBlackMarket: boolean;
 }
 
