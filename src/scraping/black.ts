@@ -14,6 +14,10 @@ export class BlackMarketScraper extends BaseScraper {
       headers: this.headers,
     });
 
+    if (response.redirected) {
+      throw new Error("Request was redirected");
+    }
+
     const html = await response.text();
     const { document } = parseHTML(html);
 

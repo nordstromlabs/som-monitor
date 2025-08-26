@@ -55,6 +55,10 @@ export class RegularScraper extends BaseScraper {
         headers: this.headers,
       });
 
+      if (response.redirected) {
+        throw new Error(`Request was redirected for region ${regionCode}`);
+      }
+
       const html = await response.text();
       const { document } = parseHTML(html);
       const grids = document.querySelectorAll(".sm\\:grid");
@@ -90,9 +94,10 @@ export class RegularScraper extends BaseScraper {
             ?.replaceAll(",", "");
 
           if (!priceEl) {
-            throw new Error(
-              `Price element not found for region ${regionCode}. Has the shop page code updated?`,
-            );
+            const avgText = child.querySelector(".text-xs.text-gray-500.text-center")?.textContent?.trim();
+            if (!avgText?.includes("free") && !avgText?.includes("(this is a new one, you can enter again!)")) {
+              throw new Error(`Price element not found for region ${regionCode}. Has the shop page code updated?`);
+            }
           }
 
           const price = Number(priceEl) || 0;
