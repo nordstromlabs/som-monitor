@@ -112,7 +112,6 @@ async function uploadImagesForItems(items: ShopItem[], oldItems: ShopItem[] | nu
     }
   }
 
-  // Collect all items that have images to process
   const itemsWithImages = items.filter(item => item.imageUrl);
   
   if (itemsWithImages.length === 0) {
@@ -122,7 +121,6 @@ async function uploadImagesForItems(items: ShopItem[], oldItems: ShopItem[] | nu
 
   console.log(`🔄 Processing ${itemsWithImages.length} images in parallel...`);
   
-  // Download and hash all images in parallel
   const downloadPromises = itemsWithImages.map(async (item) => {
     try {
       const hash = await downloadAndHashImage(item.imageUrl!);
@@ -134,18 +132,15 @@ async function uploadImagesForItems(items: ShopItem[], oldItems: ShopItem[] | nu
 
   const results = await Promise.allSettled(downloadPromises);
 
-  // Process results
   for (const result of results) {
     if (result.status === 'fulfilled') {
       const { item, hash, error } = result.value;
       
       if (error) {
-        // Handle download/hash failure
         console.error(`Failed to process image for item ${item.id} (${item.title}):`, error);
         itemToImageIndex.set(item, imagesToUpload.length);
         imagesToUpload.push(item.imageUrl!);
       } else {
-        // Successfully downloaded and hashed
         item.imageHash = hash!;
         
         const oldItem = oldItemsMap.get(item.id);
