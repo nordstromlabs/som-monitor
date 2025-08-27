@@ -105,7 +105,6 @@ async function uploadImagesForItems(items: ShopItem[], oldItems: ShopItem[] | nu
   const imagesToUpload: string[] = [];
   const itemToImageIndex = new Map<ShopItem, number>();
   
-  // Create a map of old items by ID for quick lookup
   const oldItemsMap = new Map<number, ShopItem>();
   if (oldItems) {
     for (const oldItem of oldItems) {
@@ -119,27 +118,21 @@ async function uploadImagesForItems(items: ShopItem[], oldItems: ShopItem[] | nu
     }
 
     try {
-      // Download and hash the image
       const newHash = await downloadAndHashImage(item.imageUrl);
       item.imageHash = newHash;
 
-      // Check if we have an old item with the same ID
       const oldItem = oldItemsMap.get(item.id);
       
-      // If the hash is different from the old item (or there's no old item), upload to CDN
       if (!oldItem || !oldItem.imageHash || oldItem.imageHash !== newHash) {
         itemToImageIndex.set(item, imagesToUpload.length);
         imagesToUpload.push(item.imageUrl);
       } else {
-        // Hash is the same, keep the old CDN URL if it exists
-        if (oldItem.imageUrl && oldItem.imageUrl.includes('cdn.hackclub.com')) {
+        if (oldItem.imageUrl && oldItem.imageUrl.includes('hc-cdn.hel1.your-objectstorage.com')) {
           item.imageUrl = oldItem.imageUrl;
         }
-        // Otherwise keep the current imageUrl as is
       }
     } catch (error) {
       console.error(`Failed to process image for item ${item.id} (${item.title}):`, error);
-      // On error, fall back to uploading the image
       itemToImageIndex.set(item, imagesToUpload.length);
       imagesToUpload.push(item.imageUrl);
     }
