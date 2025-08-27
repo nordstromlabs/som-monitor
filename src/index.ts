@@ -112,29 +112,51 @@ async function uploadImagesForItems(items: ShopItem[], oldItems: ShopItem[] | nu
     }
   }
 
-  for (const item of items) {
-    if (!item.imageUrl) {
-      continue;
-    }
+  const itemsWithImages = items.filter(item => item.imageUrl);
+  
+  if (itemsWithImages.length === 0) {
+    console.log("✨ No images to process.");
+    return;
+  }
 
+  console.log(`🔄 Processing ${itemsWithImages.length} images in parallel...`);
+  
+  const downloadPromises = itemsWithImages.map(async (item) => {
     try {
-      const newHash = await downloadAndHashImage(item.imageUrl);
-      item.imageHash = newHash;
+      const hash = await downloadAndHashImage(item.imageUrl!);
+      return { item, hash, error: null };
+    } catch (error) {
+      return { item, hash: null, error: error as Error };
+    }
+  });
 
-      const oldItem = oldItemsMap.get(item.id);
+  const results = await Promise.allSettled(downloadPromises);
+
+  for (const result of results) {
+    if (result.status === 'fulfilled') {
+      const { item, hash, error } = result.value;
       
-      if (!oldItem || !oldItem.imageHash || oldItem.imageHash !== newHash) {
+      if (error) {
+        console.error(`Failed to process image for item ${item.id} (${item.title}):`, error);
         itemToImageIndex.set(item, imagesToUpload.length);
-        imagesToUpload.push(item.imageUrl);
+        imagesToUpload.push(item.imageUrl!);
       } else {
-        if (oldItem.imageUrl && oldItem.imageUrl.includes('hc-cdn.hel1.your-objectstorage.com')) {
-          item.imageUrl = oldItem.imageUrl;
+        item.imageHash = hash!;
+        
+        const oldItem = oldItemsMap.get(item.id);
+        
+        if (!oldItem || !oldItem.imageHash || oldItem.imageHash !== hash) {
+          itemToImageIndex.set(item, imagesToUpload.length);
+          imagesToUpload.push(item.imageUrl!);
+        } else {
+          if (oldItem.imageUrl && oldItem.imageUrl.includes('hc-cdn.hel1.your-objectstorage.com')) {
+            item.imageUrl = oldItem.imageUrl;
+          }
         }
       }
-    } catch (error) {
-      console.error(`Failed to process image for item ${item.id} (${item.title}):`, error);
-      itemToImageIndex.set(item, imagesToUpload.length);
-      imagesToUpload.push(item.imageUrl);
+    } else {
+      // This should rarely happen since we handle errors inside the promise
+      console.error('Unexpected error in image processing promise:', result.reason);
     }
   }
 
