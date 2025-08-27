@@ -1,5 +1,5 @@
 import { parseHTML } from "linkedom";
-import { BaseScraper, ShopItems, regions, type SingleRegionItemEntry } from ".";
+import { BaseScraper, ShopItems, regions, type SingleRegionItemEntry, type RegionCode } from ".";
 import { SOM_ROOT_URL } from "../constants";
 
 const SHOP_URL = `${SOM_ROOT_URL}/shop`;
@@ -96,7 +96,7 @@ export class RegularScraper extends BaseScraper {
             purchaseUrl,
             id,
             stockRemaining: isOutOfStock ? 0 : limitedStockRemaining,
-            regionCode,
+            regionCode: regionCode as RegionCode,
             isBlackMarket: false
           });
         }

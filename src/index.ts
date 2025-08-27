@@ -7,6 +7,7 @@ import { readFile, writeFile, exists } from "node:fs/promises";
 import { deepEquals } from "bun";
 import { WebClient } from "@slack/web-api";
 import * as Sentry from "@sentry/bun";
+import { createHash } from "node:crypto";
 
 let cachedItems: ShopItem[] | null = null;
 let hasReadFromDisk = false;
@@ -87,22 +88,64 @@ async function retry<T>(
   throw lastError;
 }
 
-async function uploadImagesForItems(items: ShopItem[]) {
+async function downloadAndHashImage(imageUrl: string): Promise<string> {
+  const response = await retry(() => fetch(imageUrl));
+  
+  if (!response.ok) {
+    throw new Error(`Failed to download image from ${imageUrl}: ${response.status} ${response.statusText}`);
+  }
+  
+  const imageBuffer = await response.arrayBuffer();
+  const hash = createHash('sha256');
+  hash.update(new Uint8Array(imageBuffer));
+  return hash.digest('hex');
+}
+
+async function uploadImagesForItems(items: ShopItem[], oldItems: ShopItem[] | null = null) {
   const imagesToUpload: string[] = [];
   const itemToImageIndex = new Map<ShopItem, number>();
+  
+  const oldItemsMap = new Map<number, ShopItem>();
+  if (oldItems) {
+    for (const oldItem of oldItems) {
+      oldItemsMap.set(oldItem.id, oldItem);
+    }
+  }
 
   for (const item of items) {
-    if (item.imageUrl) {
+    if (!item.imageUrl) {
+      continue;
+    }
+
+    try {
+      const newHash = await downloadAndHashImage(item.imageUrl);
+      item.imageHash = newHash;
+
+      const oldItem = oldItemsMap.get(item.id);
+      
+      if (!oldItem || !oldItem.imageHash || oldItem.imageHash !== newHash) {
+        itemToImageIndex.set(item, imagesToUpload.length);
+        imagesToUpload.push(item.imageUrl);
+      } else {
+        if (oldItem.imageUrl && oldItem.imageUrl.includes('hc-cdn.hel1.your-objectstorage.com')) {
+          item.imageUrl = oldItem.imageUrl;
+        }
+      }
+    } catch (error) {
+      console.error(`Failed to process image for item ${item.id} (${item.title}):`, error);
       itemToImageIndex.set(item, imagesToUpload.length);
       imagesToUpload.push(item.imageUrl);
     }
   }
 
   if (imagesToUpload.length > 0) {
+    console.log(`🔄 Uploading ${imagesToUpload.length} new/changed images to CDN.`);
     const uploaded = await uploadToCdn(imagesToUpload);
     for (const [item, idx] of itemToImageIndex.entries()) {
       item.imageUrl = uploaded[idx]!.deployedUrl;
     }
+  } else {
+    console.log("✨ No new images to upload - all images unchanged.");
   }
 }
 
@@ -135,9 +178,9 @@ async function run() {
     const slack = new WebClient(env.SLACK_XOXB);
 
     const currentItems = await retry(() => scrapeAll(env.SOM_COOKIE));
-    await uploadImagesForItems(currentItems);
-
     const oldItems = await readItems();
+    
+    await uploadImagesForItems(currentItems, oldItems);
 
     if (oldItems === null) {
       await writeItems(currentItems);

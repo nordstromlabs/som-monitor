@@ -1,5 +1,5 @@
 import { parseHTML } from "linkedom";
-import { BaseScraper, ShopItems, type SingleRegionItemEntry } from ".";
+import { BaseScraper, ShopItems, type SingleRegionItemEntry, type RegionCode } from ".";
 import { SOM_ROOT_URL } from "../constants";
 
 const SHOP_URL = `${SOM_ROOT_URL}/shop/black_market`;
@@ -85,7 +85,7 @@ export class BlackMarketScraper extends BaseScraper {
         stockRemaining,
         imageUrl,
         isBlackMarket: true,
-        regionCode,
+        regionCode: regionCode as RegionCode,
         price
       };
     });
