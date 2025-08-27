@@ -22,7 +22,9 @@ export const regions = [
     code: "XX",
     name: "🌍",
   },
-];
+] as const;
+
+export type RegionCode = typeof regions[number]['code'];
 
 export const ShopItem = type({
   title: "string",
