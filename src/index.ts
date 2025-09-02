@@ -279,6 +279,10 @@ async function run() {
     const allBlocks = updates.flat();
     // Can happen if the only update was the user buying a free item!
     if (allBlocks.length === 0) return;
+    if (allBlocks.length > 30) {
+      // We almost certainly goofed up somewhere, this is a failsafe.
+      throw new Error("More than 30 updates? BS, you've goofed up somewhere.");
+    }
 
     for (let i = 0; i < allBlocks.length; i += SLACK_BLOCK_LIMIT) {
       const chunk = allBlocks.slice(i, i + SLACK_BLOCK_LIMIT);
