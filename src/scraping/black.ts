@@ -35,7 +35,7 @@ export class BlackMarketScraper extends BaseScraper {
     }
 
     const items: BlackMarketItemEntry[] = Array.from(list.children).map(row => {
-      const title = row.querySelector(".shop-item-title")?.textContent?.trim();
+      const title = row.querySelector(".shop-item-title")?.textContent?.replace?(" (NEW!!)", "").trim();
       if (!title) {
         throw new Error("Title element not found");
       }
