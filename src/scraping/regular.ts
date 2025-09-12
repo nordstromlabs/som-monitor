@@ -56,17 +56,14 @@ export class RegularScraper extends BaseScraper {
             .querySelector("div.mb-4 > p.text-gray-700")
             ?.textContent?.trim();
 
-          // Try to find sale price first (red highlighted text)
-          // Look for any element with text-red-600 class which indicates a sale price
+          // try to find sale price first (red highlighted text)
           const salePriceContainer = child.querySelector(".text-red-600");
           
           let priceEl: string | null = null;
           
           if (salePriceContainer) {
-            // Extract sale price - it should be the text content excluding the shell image
             priceEl = salePriceContainer.textContent?.trim()?.replaceAll(",", "") || null;
           } else {
-            // Fall back to regular price extraction
             priceEl = child
               .querySelector(
                 "div.absolute.top-2.right-2.text-lg.font-bold.whitespace-nowrap.flex.items-center > picture",
