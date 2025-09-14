@@ -3,6 +3,7 @@ import { BaseScraper, ShopItem, ShopItems, regions } from ".";
 import { SOM_ROOT_URL } from "../constants";
 
 const CAMPFIRE_URL = `${SOM_ROOT_URL}/campfire`;
+const STICKERLODE_MAGIC = 1337; // stickerlode items are not normal items and cannot be bought directly - as such we give them a fake ID for our internal uses.
 
 export class StickerlodeScraper extends BaseScraper {
   constructor(cookie: string) {
@@ -44,10 +45,10 @@ export class StickerlodeScraper extends BaseScraper {
           acc[region.code] = 0;
           return acc;
         }, {}),
-        id: 1337 + index,
+        id: STICKERLODE_MAGIC + index,
         shopType: 'stickerlode',
       });
-    })
+    });
 
     return ShopItems.assert(items);
   }
