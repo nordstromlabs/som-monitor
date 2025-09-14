@@ -4,8 +4,8 @@ import { SOM_ROOT_URL } from "../constants";
 
 const SHOP_URL = `${SOM_ROOT_URL}/shop`;
 
-interface RegularItemEntry extends Omit<SingleRegionItemEntry, 'isBlackMarket'> {
-  isBlackMarket: false;
+interface RegularItemEntry extends Omit<SingleRegionItemEntry, 'shopType'> {
+  shopType: 'regular';
 }
 
 export class RegularScraper extends BaseScraper {
@@ -58,9 +58,9 @@ export class RegularScraper extends BaseScraper {
 
           // try to find sale price first (red highlighted text)
           const salePriceContainer = child.querySelector(".text-red-600");
-          
+
           let priceEl: string | null = null;
-          
+
           if (salePriceContainer) {
             priceEl = salePriceContainer.textContent?.trim()?.replaceAll(",", "") || null;
           } else {
@@ -106,7 +106,7 @@ export class RegularScraper extends BaseScraper {
             id,
             stockRemaining: isOutOfStock ? 0 : limitedStockRemaining,
             regionCode: regionCode as RegionCode,
-            isBlackMarket: false
+            shopType: 'regular',
           });
         }
       }

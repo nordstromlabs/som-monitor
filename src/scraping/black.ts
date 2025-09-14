@@ -4,8 +4,8 @@ import { SOM_ROOT_URL } from "../constants";
 
 const SHOP_URL = `${SOM_ROOT_URL}/shop/black_market`;
 
-interface BlackMarketItemEntry extends Omit<SingleRegionItemEntry, 'isBlackMarket'> {
-  isBlackMarket: true;
+interface BlackMarketItemEntry extends Omit<SingleRegionItemEntry, 'shopType'> {
+  shopType: "blackMarket";
 }
 
 export class BlackMarketScraper extends BaseScraper {
@@ -84,7 +84,7 @@ export class BlackMarketScraper extends BaseScraper {
         description,
         stockRemaining,
         imageUrl,
-        isBlackMarket: true,
+        shopType: "blackMarket",
         regionCode: regionCode as RegionCode,
         price
       };
