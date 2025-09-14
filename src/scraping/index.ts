@@ -42,8 +42,7 @@ export const ShopItem = type({
   "purchaseUrl?": "string",
   id: "number >= 0",
   "stockRemaining?": "(number >= 0) | undefined",
-  "isBlackMarket": "boolean = false",
-  "isStickerlode": "boolean = false",
+  "shopType": "'regular' | 'stickerlode' | 'blackMarket'",
 });
 export type ShopItem = typeof ShopItem.infer;
 export const ShopItems = ShopItem.array();
@@ -58,8 +57,7 @@ export interface SingleRegionItemEntry {
   id: number;
   stockRemaining?: number;
   regionCode: RegionCode;
-  isBlackMarket: boolean;
-  isStickerlode: boolean;
+  shopType: 'regular' | 'stickerlode' | 'blackMarket';
 }
 
 export function mergeRegionItems(allRegionItems: SingleRegionItemEntry[]): Map<number, ShopItem> {

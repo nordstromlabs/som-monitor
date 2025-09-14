@@ -4,8 +4,8 @@ import { SOM_ROOT_URL } from "../constants";
 
 const SHOP_URL = `${SOM_ROOT_URL}/shop`;
 
-interface RegularItemEntry extends Omit<SingleRegionItemEntry, 'isBlackMarket'> {
-  isBlackMarket: false;
+interface RegularItemEntry extends Omit<SingleRegionItemEntry, 'shopType'> {
+  shopType: 'regular';
 }
 
 export class RegularScraper extends BaseScraper {
@@ -106,8 +106,7 @@ export class RegularScraper extends BaseScraper {
             id,
             stockRemaining: isOutOfStock ? 0 : limitedStockRemaining,
             regionCode: regionCode as RegionCode,
-            isBlackMarket: false,
-            isStickerlode: false,
+            shopType: 'regular',
           });
         }
       }

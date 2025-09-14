@@ -45,8 +45,7 @@ export class StickerlodeScraper extends BaseScraper {
           return acc;
         }, {}),
         id: 1337 + index,
-        isBlackMarket: false,
-        isStickerlode: true,
+        shopType: 'stickerlode',
       });
     })
 
