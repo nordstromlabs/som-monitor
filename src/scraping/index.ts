@@ -39,10 +39,11 @@ export const ShopItem = type({
     "AU?": "number >= 0",
     "XX?": "number >= 0",
   },
-  purchaseUrl: "string",
+  "purchaseUrl?": "string",
   id: "number >= 0",
   "stockRemaining?": "(number >= 0) | undefined",
-  "isBlackMarket": "boolean = false"
+  "isBlackMarket": "boolean = false",
+  "isStickerlode": "boolean = false",
 });
 export type ShopItem = typeof ShopItem.infer;
 export const ShopItems = ShopItem.array();
@@ -53,11 +54,12 @@ export interface SingleRegionItemEntry {
   imageUrl?: string;
   description?: string;
   price: number;
-  purchaseUrl: string;
+  purchaseUrl?: string;
   id: number;
   stockRemaining?: number;
   regionCode: RegionCode;
   isBlackMarket: boolean;
+  isStickerlode: boolean;
 }
 
 export function mergeRegionItems(allRegionItems: SingleRegionItemEntry[]): Map<number, ShopItem> {
@@ -113,7 +115,7 @@ export class BaseScraper {
       const allRegionItems = allRegionResults.flat();
       const results = mergeRegionItems(allRegionItems);
       const shopItems = ShopItems(Array.from(results.values()));
-      
+
       if (shopItems instanceof type.errors) {
         throw new Error(shopItems.summary);
       }

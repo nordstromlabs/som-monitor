@@ -34,6 +34,10 @@ function Spy() {
     return <>:blobhaj-spy:</>
 }
 
+function StickerlodeEmoji() {
+    return <>:stickerlode:</>
+}
+
 function formatPrices(prices: ShopItem['prices']): string {
     const priceEntries = Object.entries(prices).filter(([_, price]) => price !== undefined) as [string, number][];
     if (priceEntries.length === 0) {
@@ -63,8 +67,12 @@ function formatPrices(prices: ShopItem['prices']): string {
         .join(', ');
 }
 
-function blackMarketMarker() {
+function BlackMarketMarker() {
     return <><Spy /> <b>Black Market</b></>
+}
+
+function StickerlodeMarker() {
+    return <><StickerlodeEmoji /> <b>Stickerlode</b> <i>-- code for at least 15 minutes + create a devlog to earn this sticker!</i></>
 }
 
 function comparePrices(oldPrices: ShopItem['prices'], newPrices: ShopItem['prices']): boolean {
@@ -99,9 +107,11 @@ export function NewItem({ item }: { item: ShopItem }) {
                     <i>{item.description}</i>
                 ) : null}<br />
                 {renderStock()}<br /><br />
-                {item.isBlackMarket && (<>{blackMarketMarker()}<br /><br /></>)}
+                {item.isBlackMarket && (<>{BlackMarketMarker()}<br /><br /></>)}
+                {item.isStickerlode && (<>{StickerlodeMarker()}<br /><br /></>)}
 
-                {showBuy && (
+
+                {showBuy && item.purchaseUrl && (
                     <a href={item.purchaseUrl}><b><Trolley /> Buy</b></a>
                 )}
             </Section>
@@ -123,7 +133,8 @@ export function DeletedItem({ item }: { item: ShopItem }) {
                 {item.description && item.description !== "" ?
                     (<i>{item.description}</i>)
                     : null}<br />
-                {item.isBlackMarket && (<>{blackMarketMarker()}<br /><br /></>)}
+                {item.isBlackMarket && (<>{BlackMarketMarker()}<br /><br /></>)}
+                {item.isStickerlode && (<>{StickerlodeMarker()}<br /><br /></>)}
             </Section>
             {item.imageUrl ? <Image
                 src={item.imageUrl}
@@ -177,9 +188,10 @@ export function UpdatedItem({ oldItem, newItem }: { oldItem: ShopItem; newItem: 
                     ? `${oldItem.description || "_no description_"} → ${newItem.description || "_no description_"}`
                     : newItem.description}{' '}<br />
                 {renderStock()}<br /><br />
-                {newItem.isBlackMarket && (<>{blackMarketMarker()}<br /><br /></>)}
+                {newItem.isBlackMarket && (<>{BlackMarketMarker()}<br /><br /></>)}
+                {newItem.isStickerlode && (<>{StickerlodeMarker()}<br /><br /></>)}
 
-                {showBuy && (
+                {showBuy && newItem.purchaseUrl && (
                     <a href={newItem.purchaseUrl}><b><Trolley /> Buy</b></a>
                 )}
             </Section>

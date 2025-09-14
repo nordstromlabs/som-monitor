@@ -85,6 +85,7 @@ export class BlackMarketScraper extends BaseScraper {
         stockRemaining,
         imageUrl,
         isBlackMarket: true,
+        isStickerlode: false,
         regionCode: regionCode as RegionCode,
         price
       };

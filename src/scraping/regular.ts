@@ -58,9 +58,9 @@ export class RegularScraper extends BaseScraper {
 
           // try to find sale price first (red highlighted text)
           const salePriceContainer = child.querySelector(".text-red-600");
-          
+
           let priceEl: string | null = null;
-          
+
           if (salePriceContainer) {
             priceEl = salePriceContainer.textContent?.trim()?.replaceAll(",", "") || null;
           } else {
@@ -106,7 +106,8 @@ export class RegularScraper extends BaseScraper {
             id,
             stockRemaining: isOutOfStock ? 0 : limitedStockRemaining,
             regionCode: regionCode as RegionCode,
-            isBlackMarket: false
+            isBlackMarket: false,
+            isStickerlode: false,
           });
         }
       }
