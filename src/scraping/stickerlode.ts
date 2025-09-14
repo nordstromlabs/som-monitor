@@ -14,6 +14,14 @@ export class StickerlodeScraper extends BaseScraper {
     const response = await fetch(CAMPFIRE_URL, {
       headers: this.headers,
     });
+
+    if (!response.ok) {
+      throw new Error(`[stickerlode] HTTP ${response.status}: ${response.statusText}`);
+    }
+    if (response.redirected) {
+      throw new Error(`[stickerlode] Request was redirected to ${response.url}`);
+    }
+
     const html = await response.text();
     const { document } = parseHTML(html);
 
