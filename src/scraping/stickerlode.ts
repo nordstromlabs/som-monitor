@@ -2,8 +2,8 @@ import { parseHTML } from "linkedom";
 import { BaseScraper, ShopItem, ShopItems, regions } from ".";
 import { SOM_ROOT_URL } from "../constants";
 
-const CAMPFIRE_URL = `${SOM_ROOT_URL}/campfire`;
-const STICKERLODE_MAGIC = 1337; // stickerlode items are not normal items and cannot be bought directly - as such we give them a fake ID for our internal uses.
+const CAMPFIRE_URL = `${SOM_ROOT_URL}/campfire?show_all_old_stickers=true`;
+const STICKERLODE_MAGIC = 0xdeadbeef; // stickerlode items are not normal items and cannot be bought directly - as such we give them a fake ID for our internal uses.
 
 export class StickerlodeScraper extends BaseScraper {
   constructor(cookie: string) {
@@ -25,7 +25,7 @@ export class StickerlodeScraper extends BaseScraper {
     const html = await response.text();
     const { document } = parseHTML(html);
 
-    const grid = document.querySelector("div.relative.z-10.md\\:grid.md\\:grid-cols-3.gap-4");
+    const grid = document.querySelector(".stickerlode-grid");
     if (!grid || !grid.children) {
       throw new Error("[stickerlode] grid element not found");
     }
