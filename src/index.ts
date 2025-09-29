@@ -11,6 +11,7 @@ import { createHash } from "node:crypto";
 
 let cachedItems: ShopItem[] | null = null;
 let hasReadFromDisk = false;
+let isCheckRunning = false;
 
 const envSchema = type({
   SOM_COOKIE: "string",
@@ -328,12 +329,20 @@ Bun.serve({
         return new Response("Unauthorized", { status: 401 });
       }
 
+      if (isCheckRunning) {
+        return new Response("Check already in progress", { status: 409 });
+      }
+
+      isCheckRunning = true;
+
       try {
         await run();
         return new Response("Check completed successfully", { status: 200 });
       } catch (error) {
         console.error("Error during manual check:", error);
         return new Response(`Internal server error: ${error}`, { status: 500 });
+      } finally {
+        isCheckRunning = false;
       }
     },
   },
