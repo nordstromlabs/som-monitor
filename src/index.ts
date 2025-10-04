@@ -227,7 +227,7 @@ async function run() {
     // but the shop is closing in like 2 days so there's not much point in spending
     // time trying to fix it :shrug:
     // Not a good solution though.
-    let shouldPingChannel = true;
+    let shouldPingChannel = false;
 
     for (const currentItem of currentItems) {
       const oldItem = oldItems.find((item) => item.id === currentItem.id);
