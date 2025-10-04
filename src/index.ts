@@ -222,7 +222,12 @@ async function run() {
     const newItemNames: string[] = [];
     const updatedItemNames: string[] = [];
     const deletedItemNames: string[] = [];
-    let shouldPingChannel = false;
+    // let shouldPingChannel = false;
+    // There is a bug where it pings channel for no reason. I'm still trying to fix that,
+    // but the shop is closing in like 2 days so there's not much point in spending
+    // time trying to fix it :shrug:
+    // Not a good solution though.
+    let shouldPingChannel = true;
 
     for (const currentItem of currentItems) {
       const oldItem = oldItems.find((item) => item.id === currentItem.id);
@@ -230,19 +235,21 @@ async function run() {
       if (!oldItem) {
         updates.push(JSXSlack(NewItem({ item: currentItem })));
         newItemNames.push(currentItem.title);
-        shouldPingChannel = true;
+        // shouldPingChannel = true;
         continue;
       }
 
       if (deepEquals(oldItem, currentItem)) {
         continue;
+      } else {
+        console.log("diff!!", JSON.stringify(oldItem), JSON.stringify(currentItem));
       }
 
       updates.push(JSXSlack(UpdatedItem({ oldItem, newItem: currentItem })));
       updatedItemNames.push(oldItem.title);
 
       if (shouldNotifyChannel(oldItem, currentItem)) {
-        shouldPingChannel = true;
+        // shouldPingChannel = true;
       }
     }
 
