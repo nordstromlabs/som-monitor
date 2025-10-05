@@ -91,11 +91,11 @@ async function retry<T>(
 
 async function downloadAndHashImage(imageUrl: string): Promise<string> {
   const response = await retry(() => fetch(imageUrl));
-  
+
   if (!response.ok) {
     throw new Error(`Failed to download image from ${imageUrl}: ${response.status} ${response.statusText}`);
   }
-  
+
   const imageBuffer = await response.arrayBuffer();
   const hash = createHash('sha256');
   hash.update(new Uint8Array(imageBuffer));
@@ -105,7 +105,7 @@ async function downloadAndHashImage(imageUrl: string): Promise<string> {
 async function uploadImagesForItems(items: ShopItem[], oldItems: ShopItem[] | null = null) {
   const imagesToUpload: string[] = [];
   const itemToImageIndex = new Map<ShopItem, number>();
-  
+
   const oldItemsMap = new Map<number, ShopItem>();
   if (oldItems) {
     for (const oldItem of oldItems) {
@@ -114,14 +114,14 @@ async function uploadImagesForItems(items: ShopItem[], oldItems: ShopItem[] | nu
   }
 
   const itemsWithImages = items.filter(item => item.imageUrl);
-  
+
   if (itemsWithImages.length === 0) {
     console.log("✨ No images to process.");
     return;
   }
 
   console.log(`🔄 Processing ${itemsWithImages.length} images in parallel...`);
-  
+
   const downloadPromises = itemsWithImages.map(async (item) => {
     try {
       const hash = await downloadAndHashImage(item.imageUrl!);
@@ -136,16 +136,16 @@ async function uploadImagesForItems(items: ShopItem[], oldItems: ShopItem[] | nu
   for (const result of results) {
     if (result.status === 'fulfilled') {
       const { item, hash, error } = result.value;
-      
+
       if (error) {
         console.error(`Failed to process image for item ${item.id} (${item.title}):`, error);
         itemToImageIndex.set(item, imagesToUpload.length);
         imagesToUpload.push(item.imageUrl!);
       } else {
         item.imageHash = hash!;
-        
+
         const oldItem = oldItemsMap.get(item.id);
-        
+
         if (!oldItem || !oldItem.imageHash || oldItem.imageHash !== hash) {
           itemToImageIndex.set(item, imagesToUpload.length);
           imagesToUpload.push(item.imageUrl!);
@@ -202,7 +202,7 @@ async function run() {
 
     const currentItems = await retry(() => scrapeAll(env.SOM_COOKIE));
     const oldItems = await readItems();
-    
+
     await uploadImagesForItems(currentItems, oldItems);
 
     if (oldItems === null) {
@@ -321,13 +321,30 @@ async function run() {
 Bun.serve({
   routes: {
     "/": Response.redirect("https://go.skyfall.dev/som-monitor"),
-    "/api/shop": async () => {
-      if (cachedItems !== null) {
-        return new Response(JSON.stringify(cachedItems, null, 2), {
-          headers: { "Content-Type": "application/json" }
+    "/api/shop": async (request) => {
+      // CORS preflight
+      if (request.method === "OPTIONS") {
+        return new Response(null, {
+          status: 204,
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            "Access-Control-Max-Age": "86400",
+          },
         });
       }
-      return new Response(Bun.file(env.OLD_ITEMS_PATH));
+
+      const headers = {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      };
+
+      if (cachedItems !== null) {
+        return new Response(JSON.stringify(cachedItems, null, 2), { headers });
+      }
+
+      return new Response(Bun.file(env.OLD_ITEMS_PATH), { headers });
     },
     "/api/check": async (request) => {
       const authHeader = request.headers.get("Authorization");
