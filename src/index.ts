@@ -177,8 +177,16 @@ function isItemFree(item: ShopItem): boolean {
   return prices.length > 0 && prices.every(price => price === 0);
 }
 
+function itemsEqualWithoutImageHash(oldItem: ShopItem, newItem: ShopItem): boolean {
+  const oldCopy = { ...oldItem };
+  const newCopy = { ...newItem };
+  delete oldCopy.imageHash;
+  delete newCopy.imageHash;
+  return deepEquals(oldCopy, newCopy);
+}
+
 function shouldNotifyChannel(oldItem: ShopItem, newItem: ShopItem): boolean {
-  const ignoreKeys = ["title", "description"];
+  const ignoreKeys = ["title", "description", "imageHash"];
   const importantChange = Object.keys(newItem).some((key) => {
     if (ignoreKeys.includes(key)) return false;
     const oldVal = (oldItem as any)[key];
@@ -239,7 +247,7 @@ async function run() {
         continue;
       }
 
-      if (deepEquals(oldItem, currentItem)) {
+      if (itemsEqualWithoutImageHash(oldItem, currentItem)) {
         continue;
       } else {
         console.log("diff!!", JSON.stringify(oldItem), JSON.stringify(currentItem));
